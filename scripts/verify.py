@@ -70,6 +70,7 @@ def check_links(path, base=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--source-links', action='store_true', help='시딩 링크를 원본 경로 기준 추가 검사')
+    parser.add_argument('--base', default='d5538a3', help='커밋된 변경의 공백 검사 기준 revision (기본: d5538a3)')
     args = parser.parse_args()
     errors = []
     for name in DELIVERABLES:
@@ -101,6 +102,14 @@ def main():
         errors.append('bash -n 실패')
     if subprocess.run(['git', 'diff', '--check'], cwd=ROOT).returncode:
         errors.append('git diff --check 실패')
+    base = subprocess.run(
+        ['git', 'rev-parse', '--verify', '--end-of-options', f'{args.base}^{{commit}}'],
+        cwd=ROOT, capture_output=True, text=True,
+    )
+    if base.returncode:
+        errors.append(f'유효하지 않은 기준 revision: {args.base}')
+    elif subprocess.run(['git', 'diff', f'{base.stdout.strip()}..HEAD', '--check', '--'], cwd=ROOT).returncode:
+        errors.append(f'git diff {args.base}..HEAD --check 실패')
     source_count = 0
     if args.source_links:
         for item in manifest['seeded']:

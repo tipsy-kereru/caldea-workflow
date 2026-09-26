@@ -1,6 +1,6 @@
 # KN-2026-09-26 — Orca 탭 Codex/OMP 워커 401 "Incorrect API key" (스테일 서비스 키)
 
-**상태:** VERIFIED (실제 격리 실험으로 원인 특정 + 해결 확인)
+**상태:** VERIFIED (기록된 격리 실험과 CODEX_HOME 강제 후 우회 성공) / INFERENCE (브로커의 런타임 키 주입이라는 내부 원인)
 **심각도:** 높음 — 멀티 에이전트 워커 전면 정지
 **증상 시작:** 2026-09-26 오전 (칼데아 워크플로우 M1 워커 기동 시)
 
@@ -29,15 +29,15 @@ url: https://chatgpt.com/backend-api/codex/responses
    - 워커 프로세스 env (`ps -p <pid> -wwE`) — OPENAI_API_KEY 없음
    - keychain (`security dump-keychain`) — openai/codex 계열 서비스에 키 없음
    - 디스크 전체 grep — 키 문자열은 로그/세션 기록에만 존재
-4. **격리 실험으로 원인 특정**:
+4. **격리 실험으로 실행 경로 비교 (VERIFIED)**:
    - 내 쉘에서 `codex exec` (CODEX_HOME 미설정 → `~/.codex`) → **성공** (OK-TEST)
-   - `CODEX_HOME=<orca codex-accounts home>` 지정 → **401 Missing bearer** (api.openai.com) — orca 홈 자체가 아닌 상위 주입자가 범인
+   - `CODEX_HOME=<orca codex-accounts home>` 지정 → **401 Missing bearer** (api.openai.com) — 다른 실행 경로와 오류/endpoint가 다름을 관찰
    - Orca가 스폰한 프로세스 → **401 sk-svcac** (chatgpt.com backend)
-5. **결론:** Orca 데스크톱 앱의 codex-accounts 인증 브로커가 죽은 서비스 계정 키를 **런타임에 주입**. 디스크 어디에도 없는 키 = 앱 메모리/브로커 상태. CLI 재로그인으로는 해결 불가.
+5. **결론:** **VERIFIED** — 실행 경로별 오류가 달랐고, 관찰한 CLI 재로그인 시도 후에도 재발했으며, 아래 CODEX_HOME 강제 후에는 관찰 구간의 401 카운트가 0이었다. **INFERENCE** — Orca의 codex-accounts 인증 브로커가 스테일 키를 런타임에 주입했을 가능성. 확인한 디스크/env에서 키를 찾지 못한 것만으로 앱 메모리·브로커의 내부 주입 경로를 확정할 수 없으며, 해당 내부 동작은 직접 관찰하지 않았다.
 
-## 확정 해결 (VERIFIED)
+## 확인된 우회 (VERIFIED)
 
-워커 탭 커맨드에서 **시스템 codex 홈을 강제**한다 — Orca 브로커를 우회:
+워커 탭 커맨드에서 **시스템 codex 홈을 강제**한 뒤 정상 가동을 관찰했다. 이 결과만으로 내부 브로커 우회 메커니즘까지 검증한 것은 아니다:
 
 ```bash
 orca terminal create --worktree path:<project> \
@@ -45,7 +45,7 @@ orca terminal create --worktree path:<project> \
 ```
 
 - 적용 직후 401 제로, 워커 정상 가동 확인 (401 카운트 0)
-- 부작용: Orca의 계정 관리(rate limit 브로커)를 우회 — 시스템 `~/.codex`의 ChatGPT 인증을 직접 사용
+- **INFERENCE:** 시스템 홈 선택으로 Orca의 계정 관리·rate limit 브로커 적용 경로가 달라졌을 가능성. 브로커 적용 여부는 별도 검증이 필요하다.
 
 ## 근본 해결 후보 (미실행 — Orca/ChatGPT 앱 업데이트 대상)
 
