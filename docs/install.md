@@ -4,7 +4,11 @@
 
 ## 1. 사전 확인과 패키지 설치
 
-프로젝트 절대 경로, 기존 AGENTS/CLAUDE 규칙, 사용할 하네스, 정확한 ai-memory workspace/project 이름을 확인한다. 대상이 git 저장소가 아니어도 패키지 설치·메모리 와이어링은 가능하다(degaza-v2가 git-less인 실례). 단, 커밋→PR 리뷰 루프는 git이 필요하므로 `git init` 여부를 사용자 결정 사항으로 기록하고 임의로 초기화하지 않는다. `command -v`와 각 `--version`으로 기존 실행 파일을 식별하고, 이미 설치된 서비스·사용자 설정을 재사용한다. 기존 설정을 백업하고 변경 전후는 credential 값을 제외해 비교한다. 로컬 참고 체크아웃은 읽기만 한다.
+프로젝트 절대 경로, 기존 AGENTS/CLAUDE 규칙, 사용할 하네스, 정확한 ai-memory workspace/project 이름을 확인한다. 대상이 git 저장소가 아니어도 패키지 설치·메모리 와이어링은 가능하다(degaza-v2가 git-less인 실례). 단, 커밋→PR 리뷰 루프는 git이 필요하므로 `git init` 여부를 사용자 결정 사항으로 기록하고 임의로 초기화하지 않는다.
+
+**MCP·훅 부착 대상은 사용자에게 확인하고 기록한다(필수 입력).** "설치한다"는 것이 곧 "모든 하네스에 붙인다"가 아니다. 부착 대상 후보는 codex CLI·codex desktop GUI·OMP·agy·Claude Code·코디네이터 에이전트(예: Hermes) 등이고, 각각은 MCP 등록과 lifecycle 훅이 별개 항목이다(§3 표). 누락된 대상은 사용자 지정 질문 도구로 묻고(Spokenly 환경이면 `ask_user_dictation`), 승인된 목록만 §3에 적용한다. 이미 동일 서버에 붙어 있는 하네스는 재등록하지 않고 재사용함을 보고에 기록한다. 코디네이터 에이전트는 구현 세션이 아니므로 훅이 기본 아니며, 부착은 명시 요청 시에만 한다.
+
+`command -v`와 각 `--version`으로 기존 실행 파일을 식별하고, 이미 설치된 서비스·사용자 설정을 재사용한다. 기존 설정을 백업하고 변경 전후는 credential 값을 제외해 비교한다. 로컬 참고 체크아웃은 읽기만 한다.
 
 ```bash
 command -v python3 bash git orca ai-memory mnemosyne
