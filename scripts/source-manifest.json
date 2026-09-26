@@ -1,0 +1,69 @@
+{
+  "read_date": "2026-09-26",
+  "seeded": [
+    {
+      "path": "references/authority-memory-comparison.ko.md",
+      "sha256": "4ceb07081d2158e7158692de1698925f820ad6a0f6369cbfa385834098c490f4",
+      "original_path": "/Users/kereru/Development/mnemosyne/docs/AI_MEMORY_COMPARISON.ko.md"
+    },
+    {
+      "path": "references/source-lauren-tan-grokbot.md",
+      "sha256": "6ffbaebd5d7260a37aea64dc69e792ca8f470a1f3fc8f42c10319a1e9f070ff5"
+    },
+    {
+      "path": "references/strategy-memory-stack.md",
+      "sha256": "8e9fbfc431c197126845d4b88e34cd21a46185061af074f5d9cd860650735700"
+    },
+    {
+      "path": "references/strategy-milestone-loop.md",
+      "sha256": "34ca835ad74287a722b9e63bbe764a08da4153b4874708ad732466e9d49c3607"
+    }
+  ],
+  "local_sources": [
+    {
+      "path": "/Users/kereru/Development/ai-memory/docs/install.md",
+      "sha256": "9f4de604f9888f4781663fe9e1b9207b66cc4fe76e19322f7a73124a0aac81af",
+      "lines": 2470
+    },
+    {
+      "path": "/Users/kereru/Development/ai-memory/docs/usage.md",
+      "sha256": "b62979b0c4fb26ce6c3c8136debce0b3f6bb47a8b8dfa3364fee8b63986a1a93",
+      "lines": 539
+    },
+    {
+      "path": "/Users/kereru/Development/ai-memory/docs/mcp-install.md",
+      "sha256": "d19a3ad64a6a656ab66c10eada98ee7e68c41b39bbd57b5c10115955f2ac745d",
+      "lines": 1395
+    },
+    {
+      "path": "/Users/kereru/Development/ai-memory/docs/managed-workstreams.md",
+      "sha256": "6fd2ad17fb6380100e8e43ddbfaa9e56feaec1bc77884209d10a523ef1a32f10",
+      "lines": 777
+    },
+    {
+      "path": "/Users/kereru/Development/ai-memory/docs/support-matrix.md",
+      "sha256": "379aaf0fd01d552af2647f71ce3b6148b0a6d9d7499839e81a87e8388aaa61bf",
+      "lines": 40
+    },
+    {
+      "path": "/Users/kereru/development/mnemosyne/README.ko.md",
+      "sha256": "0c37deb40b26143dbf03ee4159f81144b28cbf48741ff963b44dd3db7613a638",
+      "lines": 388
+    },
+    {
+      "path": "/Users/kereru/development/mnemosyne/MANUAL.ko.md",
+      "sha256": "14a03009482190b1b01d58a77da52ef65282171f05a56b68ed7d4118a3490e6f",
+      "lines": 747
+    },
+    {
+      "path": "/Users/kereru/.hermes/profiles/cto/skills/autonomous-ai-agents/orca-review-cycles/SKILL.md",
+      "sha256": "c8f1dbf2bc1bb5bc494a3644cc1d7c926cec3b628360400a78fae7f751c27c81",
+      "lines": 372
+    },
+    {
+      "path": "/Users/kereru/.hermes/profiles/cto/skills/autonomous-ai-agents/orca-workspace-pitfalls/SKILL.md",
+      "sha256": "9b172966274a0aa22736f20ba737504e4990dd8f22092a4aef411a8a19bccea9",
+      "lines": 814
+    }
+  ]
+}
