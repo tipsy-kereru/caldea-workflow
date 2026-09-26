@@ -106,7 +106,7 @@ reviewer는 관측 시각과 head SHA/dirty diff hash를 판정에 포함한다.
 
 자기 발신·이전 task·이전 dispatch·이전 round를 완료로 오인하지 않는다. 새 메시지는 subject가 아니라 ID로 비교한다. 60초 이하의 rolling wait를 쓰고 주기적으로 진행 증거를 확인한다. 연속 5회 확인에서 파일/로그에 진전이 없으면 원인을 조사하고 필요한 결정을 에스컬레이션한다.
 
-프로세스 중단 후에는 마지막 유효 커밋·dirty diff·미완료 task·리뷰 round를 복원한다. ai-memory 인계와 현재 소스를 대조하고 이미 완료된 명령·커밋·PR·메시지를 재실행하지 않는다. 작업 상태의 authority는 Orca와 리포 증거이며 기억은 복구의 단서다.
+프로세스 중단 후에는 마지막 유효 커밋·dirty diff·미완료 task·리뷰 round를 복원한다. ai-memory 인계와 현재 소스를 대조하고 이미 완료된 명령·커밋·PR·메시지를 재실행하지 않는다. 작업 상태의 authority는 Orca와 리포 증거이며 기억은 복구의 단서다. Orca로 여러 하네스를 섞어 쓸 때의 전환·병행·크래시 복원 시나리오는 [KN-2026-09-26 멀티 하네스 인계](knowledge/KN-2026-09-26-multi-harness-handoff.md)를 따른다.
 
 ## Slack 진행 보고 — PROPOSAL
 
