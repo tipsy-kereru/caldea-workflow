@@ -4,7 +4,7 @@
 
 ## 1. 사전 확인과 패키지 설치
 
-프로젝트 절대 경로, 기존 AGENTS/CLAUDE 규칙, 사용할 하네스, 정확한 ai-memory workspace/project 이름을 확인한다. `command -v`와 각 `--version`으로 기존 실행 파일을 식별하고, 이미 설치된 서비스·사용자 설정을 재사용한다. 기존 설정을 백업하고 변경 전후는 credential 값을 제외해 비교한다. 로컬 참고 체크아웃은 읽기만 한다.
+프로젝트 절대 경로, 기존 AGENTS/CLAUDE 규칙, 사용할 하네스, 정확한 ai-memory workspace/project 이름을 확인한다. 대상이 git 저장소가 아니어도 패키지 설치·메모리 와이어링은 가능하다(degaza-v2가 git-less인 실례). 단, 커밋→PR 리뷰 루프는 git이 필요하므로 `git init` 여부를 사용자 결정 사항으로 기록하고 임의로 초기화하지 않는다. `command -v`와 각 `--version`으로 기존 실행 파일을 식별하고, 이미 설치된 서비스·사용자 설정을 재사용한다. 기존 설정을 백업하고 변경 전후는 credential 값을 제외해 비교한다. 로컬 참고 체크아웃은 읽기만 한다.
 
 ```bash
 command -v python3 bash git orca ai-memory mnemosyne
@@ -34,6 +34,12 @@ ai-memory serve --transport http --bind 127.0.0.1:49374
 `serve`는 장기 실행 명령이다. 별도 서비스 터미널에서 실행하고 두 번째 터미널에서 `ai-memory status --json`을 확인한다. 이미 같은 포트의 정상 서비스가 있으면 두 번째 서버를 띄우지 않는다. mise가 없으면 원본 문서의 플랫폼별 release 설치법을 따르며 동명 crates.io 패키지를 설치하지 않는다. `cargo install ai-memory`는 이 프로젝트의 설치법이 아니다.
 
 처음에는 provider 없는 capture·규칙 요약·FTS 경로로 검증할 수 있다. LLM consolidation/embedding은 별도 선택이다. 원격 서버를 사용한다면 `AI_MEMORY_SERVER_URL`을 해당 endpoint로 설정하고 인증은 운영 환경에서 주입한다. 일반 저장소 파일에 인증 값을 쓰지 않는다. 로컬 기본 주소는 `http://127.0.0.1:49374`, MCP 주소는 `/mcp`가 붙는다. 원격 접근은 원본 TLS/auth 지침을 따른다.
+
+### 필드 노트 — 2026-09-26 degaza-v2 설치 (VERIFIED 실행)
+
+- Homebrew가 있으면 `brew tap akitaonrails/tap && brew install akitaonrails/tap/ai-memory`가 mise보다 빠르다(2.4.0, 수 초). 설치 후 `ai-memory --version`으로 확인한다.
+- macOS 상주 서버는 **launchd LaunchAgent가 정석**이다. 리포의 `packaging/launchd/com.github.akitaonrails.ai-memory.plist`를 sed 치환(`__AI_MEMORY_BIN__`, `__HOME__`)해 `~/Library/LaunchAgents/`에 놓고 `launchctl bootstrap gui/$(id -u) <plist>`로 등록한다. 로그는 `~/Library/Logs/ai-memory/`에 남는다. 검증: `launchctl print gui/$(id -u)/com.github.akitaonrails.ai-memory | grep state`(running) + `curl /mcp` → 405.
+- 전용 터미널/백그라운드 셸의 `serve`는 셸 종료와 함께 죽어 캡처가 조용히 중단된다. 상주 서비스 없이 설치 완료로 보고하지 않는다.
 
 ## 3. ai-memory MCP와 훅 — 사용하는 하네스만
 
@@ -74,6 +80,21 @@ ai-memory install-instructions --target AGENTS.md
 
 bootstrap은 LLM provider가 필요하고 한 번 수행하는 초기 수집이다. provider 미설정이면 bootstrap을 미실행으로 기록하고 기본 무LLM capture 검증을 계속한다. `--force`로 기존 manifest를 덮어쓰지 않는다. install-instructions는 ai-memory 전용 마커를 관리하므로 Caldea 마커와 기존 규칙이 함께 남아야 한다. ai-memory의 일반적인 proactive 질의 안내는 Caldea의 질문별 라우팅 경계와 함께 적용한다.
 
+### 채택 시 필드 노트 — backfill·doctor·캡처 마커 (2026-09-26 VERIFIED 실행)
+
+프로젝트 중반(하네스로 이미 작업한 이력이 있을 때) 채택이면 `bootstrap` 전에 backfill을 먼저 실행한다.
+
+```bash
+ai-memory backfill   # 기존 로컬 하네스 세션 저장소를 일괄 흡수. 1회성, 재실행은 no-op
+ai-memory doctor     # 캡처 커버리지 검증: "N local → N captured"가 0이면 훅 문제
+```
+
+backfill은 LLM provider 없이 기존 codex/OMP 로컬 세션 기록을 흡수해 "설치 전 이력 공백"을 없앤다. 필드 결과: 22개 세션(5,782 이벤트) 흡수 후 doctor가 codex 16/16·omp 6/6 captured 확인. doctor는 §6 합격 판정의 표준 항목으로도 추가한다.
+
+**캡처 마커는 선택이 아니라 필수다.** `.ai-memory.toml`이 없는 저장소는 훅이 설치돼 있어도 lifecycle 이벤트가 훅 프로세스에서 drop된다(스풀·전송 0 — 조용한 무캡처). 마커에 `workspace`, 필요 시 `project`, 그리고 `[capture] ignore_paths`(예: `**/*.env*`, `**/secrets/**`)를 명시하고 설치 후 doctor로 커버리지를 확인한다.
+
+codex 첫 실행 시 훅마다 **"Hooks need review"** 신뢰 프롬프트가 뜬다. 'Trust all and continue' 선택 전까지 캡처는 시작되지 않으므로, 설치 보고에 이 사용자 액션을 남은 항목으로 명시한다.
+
 ## 4. Mnemosyne — pip·시딩·훅·MCP·스킬
 
 Python 3.11 이상 가상환경에서 설치한다. 패키지 설치용 Python 요구 조건은 Caldea 설치기의 3.9와 다르다. 운영에서 재현하려면 검토한 release/commit으로 pin한다.
@@ -110,6 +131,8 @@ mnemosyne config skill install
 
 Write/Edit 훅은 `add <file>`을 실행한다. 셸 편집은 같은 훅을 보장하지 않으며 실패는 에이전트를 막지 않는다. 설치 상태와 실제 query/wiki 갱신을 각각 검사한다. 대규모 변경·브랜치 전환 후 승인된 소스에 `mnemosyne update`를 수행하고 상태를 다시 확인한다. 기존 handler와 git hooksPath/worktree 구성을 확인하고 무조건 `--force`를 사용하지 않는다.
 
+`config hook install`은 **현재 디렉터리 기준** `.codex/hooks.json` 등에 기록한다. 반드시 대상 프로젝트 루트에서 실행하고 직후 파일 위치를 확인한다. 잘못 설치했으면 제거 명령은 `remove`다(`uninstall`은 존재하지 않는다). 필드에서 ai-memory 체크아웃 cwd에 잘못 설치해 정리한 사례가 있다(2026-09-26).
+
 ```bash
 mnemosyne mcp install --client claude-desktop
 mnemosyne mcp serve
@@ -141,9 +164,12 @@ orca terminal create --worktree id:<repo-id>::<absolute-worktree-path> --title M
 
 `ai-memory run omp`, `ai-memory run agy`, `ai-memory run claude`도 문서화된 선택이다. 동일 workstream의 동시 writer는 lease 충돌하므로 worker/reviewer에 서로 다른 이름을 주고 계속할 때 `--workstream M1-worker`를 사용한다. `run`은 선택적 native resume 기능이며 단순 handoff만 필요하면 직접 하네스를 시작할 수 있다. autowire는 실패해도 launch가 가능하므로 수동 연결 검증을 생략하지 않는다. 기본 예제에 권한 우회 플래그를 넣지 않는다.
 
+Orca가 관리하는 codex-accounts 홈은 계정 브로커의 스테일 키로 첫 모델 요청에서 401이 발생할 수 있다([원인분석](knowledge/KN-2026-09-26-codex-401-stale-key.md)). 검증된 우회: 탭 커맨드를 `env CODEX_HOME="$HOME/.codex" codex ...`로 시작해 시스템 홈의 정상 ChatGPT 인증을 사용한다. 또한 codex TUI의 idle 프롬프트(`› Ask Codex to do anything`)가 보인 뒤에만 브리프를 전송한다 — trust 승인 직후 전송하면 입력이 codex가 아닌 zsh 셸로 흡수된다.
+
 ## 6. 설치 후 합격 판정
 
 - `bash install.sh ... --check`: 스킬 bytes와 AGENTS 마커 일치.
+- `ai-memory doctor`(대상 프로젝트 루트): 최근 하네스 세션이 전부 captured인지 확인. 채택이 중반이면 backfill로 과거 이력 흡수를 선행.
 - `ai-memory status --json`: 선택한 서버·scope가 정상 응답. 재시작한 하네스에서 `memory_status` 실제 호출.
 - 비밀 없는 테스트 턴 전후 sessions/observations를 비교하고 정확한 세션 종료 및 다음 하네스에서 handoff 수신을 확인. static MCP는 workspace/project 명시.
 - `mnemosyne config hook status`: 의도한 대상만 설치. 승인된 테스트 소스를 Write/Edit 후 CLI/MCP query로 엔티티·source 변경 확인. `mnemosyne wiki doctor`의 경고도 기록.
