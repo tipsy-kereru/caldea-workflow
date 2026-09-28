@@ -116,6 +116,21 @@ payload는 milestone, phase, elapsed, 검사 요약, commit/PR, blocker, 다음 
 
 채널 미설정 시 보고 초안을 로컬 증거에 남긴다. 승인 요청은 사용자의 입력 수단을 따른다(Spokenly 사용 환경은 `ask_user_dictation`). Slack 수집과 발송은 별개며 Onyx/Slack 제한 원문은 ai-memory나 일반 Mnemosyne graph로 복사하지 않는다.
 
+### 에이전트 간 Slack 멘션 — 2026-09-28 실측
+
+에이전트(봇 프로필)끼리는 **정식 Slack 멘션으로만 서로를 깨울 수 있다.** 게이트웨이 설정 `allow_bots: mentions`는 봇이 보낸 메시지를 **정식 멘션일 때만** 수신한다는 뜻이다.
+
+- 마크다운 텍스트에 `@이름`을 쓰는 것은 멘션이 아니다. 봇이 보내는 메시지는 Slack 자동완성 없이 게시되므로 `@Hassan` 같은 텍스트는 `<@U0...>` 형식의 user ID가 없으면 수신자에게 도달하지 않는다(실측: degaza-v2 PR 리뷰 요청이 수신되지 않은 사례).
+- 멘션 형식: 본문에 `<@U0XXXXXXXX>`처럼 user ID를 직접 포함한다. 봇도 워크스페이스 멤버로서 bot user ID(`U` 또는 `W` 접두)를 가지므로 멘션이 가능하다.
+
+**user ID 찾는 법 (빠른 순):**
+
+1. Slack UI: 대상 이름을 `@`로 입력해 자동완성으로 선택하면 정식 멘션이 된다. ID를 직접 확인하려면 프로필 → 더 보기 → "멤버 ID 복사"(Copy member ID).
+2. 수신 측 게이트웨이 로그: `grep -oE "U[A-Z0-9]{9,11}" ~/.hermes/profiles/<profile>/logs/agent.log` — inbound 메시지의 발신자 ID가 기록된다. 자기 로그에만 있는 ID는 남이고, 원하는 에이전트가 보낸 메시지 1건이 있으면 그 ID를 재사용한다.
+3. 발신 봇의 자기 식별: 대상 게이트웨이의 `gateway.log`에서 `Authenticated as @<handle>` 행으로 봇 이름을, 대화 원문의 `<@...>` 멘션으로 ID를 확인한다. 토큰·자격증명 파일은 열지 않는다.
+
+**수신 확인:** 상대 프로필 `logs/agent.log`의 `inbound message` 행으로 전달 여부를 확인한다. `allow_bots`의 기본값은 봇 메시지 무시일 수 있으므로, 봇 간 라우팅이 실패하면 먼저 양쪽 `config.yaml`의 `slack.extra.allow_bots`를 확인한다. 멘션에도 무응답이면 상대 Socket Mode 재접속 로그(`Socket Mode unhealthy`)를 확인하고 게이트웨이 재시작은 사용자가 수행한다.
+
 ## 기억과 다음 작업
 
 시작/세션 재개는 ai-memory handoff를 먼저 확인하며 없으면 정확한 scope에서 목록 후 선택 수락한다. 구조 질의는 Mnemosyne로 보내고 소스 revision을 확인한다. 동일 질문을 이중 질의하지 않는다. 확정된 구조 지식만 출처를 유지해 graph에 반영하며 durable memory 수동 쓰기는 사용자의 요청 범위를 따른다.
