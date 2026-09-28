@@ -122,6 +122,15 @@ payload는 milestone, phase, elapsed, 검사 요약, commit/PR, blocker, 다음 
 
 - 마크다운 텍스트에 `@이름`을 쓰는 것은 멘션이 아니다. 봇이 보내는 메시지는 Slack 자동완성 없이 게시되므로 `@Hassan` 같은 텍스트는 `<@U0...>` 형식의 user ID가 없으면 수신자에게 도달하지 않는다(실측: degaza-v2 PR 리뷰 요청이 수신되지 않은 사례).
 - 멘션 형식: 본문에 `<@U0XXXXXXXX>`처럼 user ID를 직접 포함한다. 봇도 워크스페이스 멤버로서 bot user ID(`U` 또는 `W` 접두)를 가지므로 멘션이 가능하다.
+- **발송 명령**(코디네이터가 사용자 중개 없이 검수 요청을 보낼 때):
+
+```bash
+hermes send -t "slack:<chat_id>:<thread_ts>" "<@<상대_봇_ID>> 메시지 본문"
+```
+
+`hermes send`는 현재 프로필의 gateway 자격증명을 재사용하므로 토큰 파일 열람이 필요 없다. auth.json에서 토큰을 직접 추출해 curl로 보내는 방식은 not_authed 실패(실측)다. 토큰을 열람해도 안 되는 이유는 원칙이며, 아니되오까.
+
+- **스레드 원문의 `<@U...>`가 상대라는 보장이 없다.** 내가 처음 받은 메시지에 태그된 ID는 나 자신일 수 있다(degaza-v2 실측: 자기 ID를 Hassan으로 오인 발송 → 상대 무수신 → 상대 세션 기록으로 정정). ID 경합 가능성이 있으면 위 표기 위주 실측 순서로 확인하고, 최종 증거는 **발송 후 상대 gateway.log의 `inbound message` 착륙 행**이다.
 
 **user ID 찾는 법 (빠른 순):**
 
@@ -130,6 +139,13 @@ payload는 milestone, phase, elapsed, 검사 요약, commit/PR, blocker, 다음 
 3. 발신 봇의 자기 식별: 대상 게이트웨이의 `gateway.log`에서 `Authenticated as @<handle>` 행으로 봇 이름을, 대화 원문의 `<@...>` 멘션으로 ID를 확인한다. 토큰·자격증명 파일은 열지 않는다.
 
 **수신 확인:** 상대 프로필 `logs/agent.log`의 `inbound message` 행으로 전달 여부를 확인한다. `allow_bots`의 기본값은 봇 메시지 무시일 수 있으므로, 봇 간 라우팅이 실패하면 먼저 양쪽 `config.yaml`의 `slack.extra.allow_bots`를 확인한다. 멘션에도 무응답이면 상대 Socket Mode 재접속 로그(`Socket Mode unhealthy`)를 확인하고 게이트웨이 재시작은 사용자가 수행한다.
+
+## 설치 프로젝트 참고 — 실측 절차 인덱스
+
+다른 프로젝트에 칼데아 워크플로우를 설치해 운영할 때, 이 저장소의 knowledge 문서가 절차 정본이다. 운영 중 새 실측이 나오면 `docs/knowledge/KN-<날짜>-<주제>.md`로 추가하고 이 인덱스에 연결한다.
+
+- [KN-2026-09-26 멀티 하네스 인계](knowledge/KN-2026-09-26-multi-harness-handoff.md) — 하네스 혼용 시 기억 공유·인계·크래시 복원.
+- [KN-2026-09-28 봇 멘션 디스패치와 리커버리](knowledge/KN-2026-09-28-bot-mention-dispatch-and-recovery.md) — 봇→봇 정식 멘션 발송·수신 실측(hermes send), ID 오인 함정, 모니터 설계(from_handle 필터·timeout 래핑), 워커 사망·디스패치 오배정·리베이스 레이스 복구 절차. degaza-v2 마일스톤 3건 연속 merge 실측 기반.
 
 ## 기억과 다음 작업
 
