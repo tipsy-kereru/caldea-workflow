@@ -38,6 +38,7 @@ static MCP는 정확한 workspace/project를 명시한다. 기억은 검증할 �
 Codex/agy 마지막 턴 뒤 exact-session finalize-session을 확인한다. 이미 종료된 Codex는 종료·handoff 증거를 기록한다.
 mnemosyne add는 LLM/CLI fallback 호출 가능 경로다. 제한 Slack/Onyx 원문과 시크릿은 일반 graph/세션 기억에 합류시키지 않는다.
 Slack는 승인된 채널에 단계 완료·5분 하트비트를 보고한다. 자동 병합은 명시적으로 승격된 권한 범위에서만 한다.
+멘션 라우팅: Slack 그룹에서 마스터가 특정 서번트(에이전트 앱)를 멘션해 지시하면, 멘션된 앱만 그 작업을 수행한다. 멘션되지 않은 앱은 요청·보완·선제 대응으로 개입하지 않고 자기 영역 밖 요청은 무시한다. 자기 세션에 전달된 멘션 지시가 타 앱을 향한 것이면 수행하지 않고 소유 앱에 맡긴다.
 <!-- caldea-workflow:end -->
 '''.encode('utf-8')
 
