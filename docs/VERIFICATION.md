@@ -69,3 +69,34 @@ $ git diff --stat
 실제 ai-memory/Mnemosyne 서버 설치·MCP 왕복·하네스 간 인계·provider 수집·GitHub PR 리뷰/병합·Slack 발송은 이번 M1에서 실행하지 않았다. 운영 방법론의 성공은 ROADMAP의 후속 환경별 gate에서 별도 증명해야 한다. 시딩 4개의 bytes는 SHA-256 및 최초 커밋과의 diff로 보존을 확인했다. 외부 체크아웃 코드는 수정하지 않았다.
 
 재실행 명령은 `python3 scripts/verify.py --source-links`, `python3 scripts/test_install.py`, `git diff 32b9a4e..HEAD --check`다. 배포 환경에 원본 체크아웃이 없으면 `--source-links` 없는 패키지 검사를 사용하고 원본 검증은 별도 환경의 증거로 취급한다.
+
+## 2026-10-08 — 선별 품질 보강 검증
+
+대상은 [D003](DECISIONS.md#d003--agent-skills의-고효익-점검만-내장)의 패키지 변경이며, 기존 M1 기록이나 실제 운영 신뢰 단계는 승격하지 않는다. [스킬](../skills/milestone-loop/SKILL.md#선별-품질-보강)에 검증 기준 보호·조건부 보안 위협·조건부 성능 측정을 내장하고 설치기의 라우팅과 기존 계약 문서에 연결했다.
+
+- `python3 scripts/verify.py`: exit 0. 필수 산출물·상대 링크/앵커·frontmatter·Bash 구문·diff 공백·시딩 4개 SHA-256 통과. `--source-links`는 미실행.
+- `python3 scripts/test_install.py`: exit 0, 14 tests OK.
+- 별도 임시 프로젝트/skills 경로에서 실제 `install.sh` 실행 exit 0. 기존 프로젝트 권한 문구 보존, `--check` exit 0, 재설치 UNCHANGED 및 bytes/mtime 불변 확인. 홈·전역 스킬·MCP·훅은 변경하지 않았다.
+- 설치된 SKILL.md를 system 입력으로 사용한 도구 없는 `completion` 판정 smoke: 아래 5개 가상 증거 시나리오의 실제 응답이 기대 판정과 일치했다. 모델 선택은 `default`이고 구체 모델 ID는 기록하지 않았으므로 재현 가능한 정량 Eval로 취급하지 않는다.
+
+| 가상 입력 | 관측한 판정 |
+|---|---|
+| 승인 없이 coverage 기준 90%→60%, 필수 권한 테스트 skip | REQUEST CHANGES |
+| 외부 payload 경로의 재귀 삭제에 허용 루트·symlink·소유 검사와 필수 오용 검증 없음 | REQUEST CHANGES |
+| cold baseline 190/200/210ms와 warm 변경 후 185/195/205ms로 개선 주장 | REQUEST CHANGES |
+| 승인된 문구 고정 테스트 삭제, 대체 사용자 동작 검사와 기존 DoD·동일 head 증거 있음 | PASS |
+| 동일 조건 baseline 195/200/205ms와 변경 후 98/100/102ms, 기존 DoD·보안·신선도 유지 | PASS |
+
+거부 응답은 worker 수정·재검증을 요구했고, 허용 응답도 해당 head의 판정으로 제한했다. reviewer 수정/mutation 및 권한 없는 커밋·병합을 지시하지 않았다. 임시 설치는 제거했고 영구 테스트나 추가 실행 도구는 만들지 않았다.
+
+한계: 가상 입력의 suite/측정값은 fixture이지 실제 제품 실행 결과가 아니다. 이 smoke는 보강 문구를 읽은 모델의 판정만 관찰하며, native 스킬 선택·실제 도구 권한·Orca 상태 전이·CI 차단·보안/성능 개선·결함 감소·시간/토큰 절감을 검증하지 않는다.
+
+## 2026-10-08 — v0.1.0 설치·갱신 진입점 검증
+
+- `python3 scripts/verify.py`: exit 0. VERSION과 스킬 metadata의 일치 검사 추가, 문서·스킬·Bash·시딩 보존 검사 통과.
+- `python3 scripts/test_install.py`: exit 0, 15 tests OK. 혼합 패키지 버전을 정상 설치와 `--check` 모두 쓰기 전에 거부하는 회귀 검사 포함. 본문의 metadata 문구가 frontmatter 불일치를 숨길 수 없는 경우도 검증했다.
+- `bash install.sh --version`: exit 0, `Caldea Workflow 0.1.0`.
+- 이전 main `ec0d7ca14f36391c729e1347416c3d4889c27007`의 실제 설치기를 git archive로 임시 경로에 추출해 구버전을 설치했다. 새 설치기의 `--check`가 exit 1로 드리프트를 표시하고 bytes/mtime을 보존했다. 갱신 후 `--check` exit 0, 이전 스킬 백업·프로젝트 권한 문구 보존·metadata/마커/태그 지침 URL의 0.1.0 식별·재설치 UNCHANGED를 확인했다. 임시 경로는 제거했다.
+- 루트 AGENTS와 버전 고정 설치 문서를 읽힌 도구 없는 `completion` smoke에서 모델이 `v0.1.0`, 동일 project/custom skills-dir의 설치·검사 명령, 기존 MCP/훅 보존, 재시작/reload 후 실제 metadata/마커 버전 확인을 선택했다. 파일 존재만으로 완료하지 않았다. `default` 모델의 한 시나리오 관찰이며 구체 모델 ID는 기록하지 않았다.
+
+실제 사용자 홈·전역 설치·하네스 설정은 변경하지 않았다. native 하네스의 자동 파일 발견/스킬 reload, 외부 서비스 실행 또는 운영 신뢰 단계 승격은 이 검증의 범위가 아니다. 원격 태그 체크아웃 검증은 배포 후 별도 실행 결과로 보고한다.

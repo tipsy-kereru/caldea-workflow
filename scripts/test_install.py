@@ -169,6 +169,27 @@ class InstallContract(unittest.TestCase):
         self.run_install()
         self.assertEqual(sibling.read_text(), '추가 파일 보존')
 
+    def test_mixed_package_versions_fail_before_writes(self):
+        package = self.root / 'mixed package'
+        source = package / 'skills/milestone-loop/SKILL.md'
+        source.parent.mkdir(parents=True)
+        shutil.copy2(ROOT / 'install.sh', package / 'install.sh')
+        # 본문에 같은 metadata가 있어도 frontmatter의 버전 불일치를 숨길 수 없다.
+        (package / 'VERSION').write_text('999.0.0\n')
+        source.write_bytes((ROOT / 'skills/milestone-loop/SKILL.md').read_bytes() +
+                           b'\nmetadata: {"version": "999.0.0"}\n')
+        before = self.snapshot()
+        for extra in ([], ['--check']):
+            process = subprocess.run(
+                ['bash', str(package / 'install.sh'), '--project', str(self.project),
+                 '--skills-dir', str(self.skills), *extra],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(process.returncode, 2, process.stdout + process.stderr)
+            self.assertEqual(before, self.snapshot())
+            self.assertFalse(self.skills.exists())
+            self.assertFalse(self.agents.exists())
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

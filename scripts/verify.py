@@ -90,13 +90,18 @@ def main():
             count += check_links(path)
         except ValueError as error:
             errors.append(str(error))
-    # 이 스킬은 YAML의 JSON-compatible scalar 부분집합만 사용한다.
+    # frontmatter는 표준 라이브러리로 읽을 수 있는 JSON-compatible 값만 사용한다.
     skill = (ROOT / 'skills/milestone-loop/SKILL.md').read_text()
-    front = re.match(r'\A---\nname: ([a-z0-9-]+)\ndescription: ("[^\n]+")\n---\n', skill)
+    front = re.match(r'\A---\nname: ([a-z0-9-]+)\ndescription: ("[^\n]+")\nmetadata: (\{[^\n]+\})\n---\n', skill)
     try:
+        version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
+        if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version):
+            raise ValueError('유효한 패키지 VERSION 없음')
         if not front or front[1] != 'milestone-loop' or not json.loads(front[2]):
             raise ValueError('유효한 name/description YAML frontmatter 없음')
-    except (ValueError, TypeError) as error:
+        if json.loads(front[3]).get('version') != version:
+            raise ValueError('VERSION과 스킬 metadata.version 불일치')
+    except (OSError, ValueError, TypeError, AttributeError) as error:
         errors.append(str(error))
     if subprocess.run(['bash', '-n', str(ROOT / 'install.sh')], cwd=ROOT).returncode:
         errors.append('bash -n 실패')

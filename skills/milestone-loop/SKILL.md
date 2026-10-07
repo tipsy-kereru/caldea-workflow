@@ -1,12 +1,15 @@
 ---
 name: milestone-loop
 description: "사용자가 승인한 마일스톤을 개발, 기계 검증, 커밋, PR, 최대 3라운드 리뷰와 개선, 다음 마일스톤까지 Orca로 조율한다. 세션 인계와 코드 구조 질의를 분리하고 디스크 증거로 완료를 판정한다."
+metadata: {"version": "0.1.0"}
 ---
 <!-- caldea-workflow:managed-skill:v1 -->
 
 # 칼데아 마일스톤 루프
 
 이 스킬은 설치된 위치에서 단독으로 읽고 실행할 수 있다. 아래는 **PROPOSAL: 하네스 운영 계약**이다. 문서나 스킬 설치를 실제 CI·하네스·PR·Slack 검증 성공으로 표현하지 않는다. 사용자가 요청한 구현 범위와 프로젝트 AGENTS의 권한·DoD를 먼저 따른다.
+
+설치된 패키지 버전은 frontmatter의 `metadata.version`이다. 설치·갱신 요청이면 [이 버전의 설치 지침](https://github.com/tipsy-kereru/caldea-workflow/blob/v0.1.0/docs/install.md)을 먼저 읽고 대상 프로젝트·하네스·스킬 경로를 확인한다. 새 버전은 해당 태그의 지침과 VERSION을 확인해 설치한 뒤 `--check` 및 새 세션에서 스킬/AGENTS 버전을 확인한다. 기억·문서만으로 갱신 완료를 주장하지 않는다.
 
 ## 시작 조건과 역할
 
@@ -81,6 +84,31 @@ orca orchestration send --type worker_done --outcome succeeded --task-id <task> 
 
 UI/동작 변경은 Feature Map의 기능 진입 경로, 선행 상태, 관련 코드, 재현 명령, 기대 결과로 검증한다. 그래프 설명만으로 동작을 판정하지 않는다.
 
+## 선별 품질 보강
+
+별도 스킬·라우터·리뷰 루프 없이 아래 점검을 기존 선정·개발·검증·리뷰에 적용한다. 코디네이터의 상태·권한·DoD·3라운드 상한은 그대로다. 새 도구 설치·훅·외부 전송 권한을 만들지 않으며 reviewer는 파일 변경이나 mutation 실험 없이 diff·소스·검증 증거만 읽는다.
+
+### 검증 기준 보호 — 모든 변경
+
+- reviewer는 선정 때 확정한 DoD와 기준 revision의 검사 설정을 현재 diff와 비교한다. 임계치 하향, 필수 검사 제거, test skip/삭제, assertion 축소, 새 억제 주석(`type: ignore`, `eslint-disable`, `istanbul ignore`, `nosemgrep`, `gitleaks:allow` 등), 빈 catch·미구현 stub·새 예외를 확인한다.
+- 발견만으로 결함을 단정하지 않는다. 요구 변경·불필요 테스트 제거 등 정당한 변경은 근거·승인 범위·대체 검증을 기록한다. 실패를 숨기려는 변경이나 승인되지 않은 기준 완화는 REQUEST CHANGES이며 기존 필수 gate를 대체하지 못한다.
+- 기준 조정은 코디네이터가 사용자 승인 범위에서 명시적으로 기록한다. 실행 후 실패한 검사를 낮추거나 제외하여 같은 작업의 PASS를 만들지 않는다.
+
+### 보안 위협 점검 — 신뢰 경계가 바뀌는 변경
+
+- 인증·권한·민감 데이터·외부 연동·비신뢰 입력·파일 삭제/이동/덮어쓰기 변경이면 선정 시 자산, 입력 작성자, 신뢰 경계, 가능한 오용, 검증 방법을 브리프에 기록하고 worker/reviewer에 전달한다. 해당하지 않으면 이유만 남긴다.
+- 신원 위조·변조·행위 부인·정보 유출·서비스 거부·권한 상승 관점에서 관련 위협만 고른다. LLM 출력·로그·작업 payload·다른 프로세스가 제공한 값도 작성자를 기준으로 비신뢰 데이터를 판별한다.
+- 관련 경계의 서버 측 권한 검사, injection/출력 인코딩, URL 기반 내부망 접근(SSRF), 시크릿/민감 데이터 전송, 입력 크기·자원 한도를 확인한다. 파생 경로의 파괴 작업은 symlink를 해석한 대상이 허용 루트 아래인지, 루트 자체가 아닌지, 소유 증거가 있는지 확인하며 검사 후 대상 교체 가능성도 검토한다.
+- worker가 오용 사례의 회귀 검사·실행 증거를 마련하고 코디네이터가 DoD에서 검증한다. reviewer는 해당 증거와 소스를 대조한다. 필수 증거가 없으면 완료하지 않고 기존 BLOCKED/개선 절차를 따른다.
+
+### 측정 기반 성능 검증 — 성능 요구 또는 회귀가 있는 변경
+
+- 선정 때 실제 지표, 측정 명령·환경·데이터·캐시 상태·반복 예산·판정 기준을 정한다. 임의의 공통 임계치를 도입하지 않으며 성능과 무관한 작업은 추가 측정 없이 비적용 이유만 남긴다.
+- worker/코디네이터가 baseline과 변경 후를 같은 조건·예산에서 반복 측정하고 실행별 결과·변동폭·revision을 보고한다. 조건이 다르거나 개선폭이 변동폭 안이면 개선을 입증한 것이 아니다. 정적 추정은 `미측정`으로 구분한다.
+- 효과가 입증되지 않은 최적화는 worker가 승인 범위에서 제거·수정하고 재검증한다. reviewer는 직접 revert하지 않는다. 기능·보안·신선도·기존 필수 DoD를 희생한 속도 개선은 통과 근거가 아니다.
+
+worker 보고와 reviewer 판정에는 `점검 / 적용 여부와 이유 / 근거·증거 / 발견·잔여 위험`을 포함한다. 사용자에게 이미 확정된 기준을 다시 묻거나 독립 리뷰를 추가하지 않는다. 자연어 점검만으로 CI 강제나 결함 감소가 입증됐다고 표현하지 않는다.
+
 ## 리뷰와 복구
 
 리뷰 응답은 findings-first: `severity / file:line / 영향 / 수정 제안`, `PASS | CONDITIONAL PASS | REQUEST CHANGES`, 잔여 위험, 좁힌 재리뷰 범위를 요구한다. 수정·커밋은 reviewer에게 맡기지 않는다. 최대 3라운드에서 미수렴하면 원인·시도·마지막 정상 SHA·필요 결정을 에스컬레이션한다. 기계 gate의 같은 실패는 3회 또는 합의된 시간 예산 이후 조사/에스컬레이션하며 실패를 성공으로 바꾸지 않는다.
@@ -113,3 +141,5 @@ ai-memory는 **page/observation/session/handoff 기반 작업 연속성**, Mnemo
 Caldea M1의 `references/authority-memory-comparison.ko.md`가 기억 경계의 권위 자료다. `source-lauren-tan-grokbot.md`, 두 strategy 문서, ai-memory 설치/usage/MCP/managed/support 문서, Mnemosyne README/MANUAL §3.8을 종합했다. 원문은 Caldea 리포에서 조회할 수 있지만 설치된 스킬 실행에 필수는 아니다.
 
 로컬 참고 스킬 `orca-review-cycles`의 수렴 루프·read-only reviewer·3라운드 규칙과 `orca-workspace-pitfalls`의 diff/mtime·3자 확인·dispatch 규칙을 통합했다. 참고 위치는 `/Users/kereru/.hermes/profiles/cto/skills/autonomous-ai-agents/`였다. 다른 프로젝트 전용 테스트·페르소나·권한 우회 설정은 적용하지 않는다. source는 M1 연구 기록에서 추적하며 이 설치본은 외부 상대 파일 없이 자기완결적이다.
+
+선별 품질 보강은 [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills/tree/1401c8b8030e023baeebb31781a6653fe8e93026)의 security-and-hardening, constraint-driven-development의 기준 보호, performance-optimization의 측정 원칙을 참고해 Caldea 계약으로 재작성했다(MIT, upstream revision `1401c8b8030e023baeebb31781a6653fe8e93026`). upstream 원문·스크립트·공유 references는 배포하지 않으며 실행에 외부 자료가 필요하지 않다.

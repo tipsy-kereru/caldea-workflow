@@ -2,6 +2,35 @@
 
 이 문서를 받은 에이전트는 아래 순서대로 대상 프로젝트를 설정하라. 명령은 **VERIFIED(지정 로컬 문서·CLI help 확인)**이며, 대상 컴퓨터에서 실행하기 전에는 설치 완료로 표시하지 않는다. 명령의 경로·scope 값은 실행 환경에서 확정한다. API 키·토큰 값은 저장소·보고서·명령 기록에 쓰지 않는다.
 
+## 0. 버전 고정 설치·갱신
+
+현재 배포 버전은 **0.1.0**, 태그는 **v0.1.0**이다. [VERSION](../VERSION)이 패키지 버전 정본이며 [변경 이력](../CHANGELOG.md)을 함께 읽는다. 저장소 루트의 AGENTS.md/CLAUDE.md는 이 문서로 라우팅하고, 설치기는 대상 AGENTS 마커에 버전과 해당 태그의 설치 지침 URL을 기록한다. 설치된 스킬의 `metadata.version`으로 로드한 버전을 식별한다.
+
+### 새 설치 또는 기존 패키지 갱신
+
+릴리스 태그의 새 체크아웃을 사용한다. 기존 체크아웃에 미커밋 변경이 있으면 checkout/reset/pull로 덮어쓰지 않는다. 아래 clone 목적지는 아직 없는 디렉터리로 정한다.
+
+```bash
+git clone --branch v0.1.0 --single-branch https://github.com/tipsy-kereru/caldea-workflow.git /absolute/tools/caldea-workflow-v0.1.0
+# 새 체크아웃을 cwd로 사용
+cd /absolute/tools/caldea-workflow-v0.1.0
+git describe --tags --exact-match
+bash install.sh --version
+# 대상 프로젝트·target·기존 비표준 skills-dir을 확인한 뒤:
+bash install.sh --project /absolute/project --target agents
+bash install.sh --project /absolute/project --target agents --check
+```
+
+tag는 `v0.1.0`, installer 출력은 `Caldea Workflow 0.1.0`이어야 한다. Claude Code 전용 경로는 두 설치 명령 모두 `--target claude`로 바꾼다. 기존에 `--skills-dir`을 사용했다면 설치와 검사에 같은 절대 경로를 전달한다. VERSION과 스킬 frontmatter 버전이 다르면 설치기는 쓰기 전에 exit 2로 거부한다.
+
+기존 Caldea도 같은 명령으로 갱신한다. 먼저 `--check`를 실행해 드리프트(exit 1)를 볼 수 있지만 검사는 갱신하지 않는다. 실제 설치는 관리 스킬과 Caldea 마커만 백업 후 교체하며 마커 밖의 프로젝트 규칙·권한·DoD를 보존한다. **사용자 홈의 스킬은 여러 프로젝트가 공유할 수 있다.** `agents`/`claude` 기본 경로를 갱신할 때 공유 영향을 확인하고, 격리가 필요하면 해당 하네스가 읽는 프로젝트별 스킬 경로를 확인해 `--skills-dir`을 사용한다. 패키지 갱신만으로 기존 MCP·훅·서버·Orca를 재설치하지 않는다.
+
+### 하네스 인식과 완료 증거
+
+선택한 하네스를 재시작하거나 실제 지원하는 reload 절차를 수행한다. 새 세션에서 대상 프로젝트 AGENTS.md의 Caldea 버전과 **실제로 읽힌** milestone-loop의 `metadata.version`이 모두 `0.1.0`인지 확인한다. 중복 스킬이나 다른 skills-dir이 먼저 로드되면 경로를 조정하고 다시 확인한다. 기존 세션이 기억하는 구버전 설명을 새 버전 로드 증거로 쓰지 않는다.
+
+보고에는 `요청 tag / package --version / project / harness / 실제 skill path / loaded metadata.version / --check exit / backup / 남은 외부 설정`을 남긴다. 패키지 설치와 실제 하네스 로드, 기존 외부 서비스 동작은 별도 판정한다. 다른 프로젝트에 지침을 전달할 때 루트 AGENTS.md를 통째로 복사하지 않고 이 문서를 읽힌 뒤 설치기의 관리 마커와 템플릿을 사용한다.
+
 ## 1. 사전 확인과 패키지 설치
 
 프로젝트 절대 경로, 기존 AGENTS/CLAUDE 규칙, 사용할 하네스, 정확한 ai-memory workspace/project 이름을 확인한다. 대상이 git 저장소가 아니어도 패키지 설치·메모리 와이어링은 가능하다(degaza-v2가 git-less인 실례). 단, 커밋→PR 리뷰 루프는 git이 필요하므로 `git init` 여부를 사용자 결정 사항으로 기록하고 임의로 초기화하지 않는다.
@@ -40,6 +69,8 @@ bash install.sh --project /absolute/project --target agents --check
 `--check`는 설치할 내용을 기준으로 스킬·AGENTS 마커의 일치를 읽기 전용으로 검사한다. 일치하면 exit 0, 누락/드리프트는 1, 잘못된 인자·중복/불완전 마커·충돌 경로는 2다. 기존 symlink 목적지나 다른 사용자의 동명 스킬을 자동 덮어쓰지 않고 오류로 보고한다. 변경 전 백업으로 수동 복원할 수 있다. 설치기는 서버·MCP·훅·Orca 등록을 수행하지 않는다.
 
 [AGENTS 템플릿](../templates/AGENTS.md)을 보고 필수 명령·보고 경로를 기존 규칙에 채운다. Claude Code도 쓰면 CLAUDE.md 첫 줄의 `@AGENTS.md` import를 보존·추가한다. 설치기가 CLAUDE.md를 자동 변경하지 않으므로 이 확인을 생략하지 않는다.
+
+선별 품질 보강은 milestone-loop 본문에 내장되어 외부 agent-skills 설치나 공유 references가 필요 없다. 기존 설치에도 위 명령을 재실행하면 스킬과 Caldea 마커가 백업 후 갱신된다. 새 패키지의 `--check`만 실행하면 이전 내용은 드리프트(exit 1)로 표시하며 자동 수정하지 않는다. [선별 품질 점검 템플릿](../templates/AGENTS.md#선별-품질-점검)을 참고해 마커 밖의 기존 프로젝트 계약과 승인된 DoD를 유지한다. 보강은 checker·훅·도구를 자동 설치하지 않는다.
 
 ## 2. ai-memory 서버
 

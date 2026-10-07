@@ -4,6 +4,8 @@
 
 현재 M1 패키지에는 설치 가능한 `milestone-loop` 스킬, 프로젝트 지침 템플릿, 설치기와 운영 문서가 포함됩니다. **독립 실행 애플리케이션, 실행 데몬, Slack 봇은 아닙니다.** 아래 루프는 설치한 하네스가 수행할 운영 계약이며, 패키지 설치만으로 CI·외부 서비스·자동 병합이 활성화되지는 않습니다.
 
+현재 릴리스: **v0.1.0** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치·갱신을 맡기려면 [설치 지침](docs/install.md)을 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
+
 ```text
 사용자 지시 → 마일스톤 선정 → 개발 → 기계 검증 → 커밋 → PR
                           ↑                          ↓
@@ -24,8 +26,9 @@
 **필수 환경:** Git(저장소 복제 및 커밋·PR 루프), Bash 3.2 이상, Python 3.9 이상. 설치 대상 프로젝트 디렉터리는 미리 존재해야 합니다.
 
 ```bash
-git clone https://github.com/tipsy-kereru/caldea-workflow.git
-cd caldea-workflow
+git clone --branch v0.1.0 --single-branch https://github.com/tipsy-kereru/caldea-workflow.git caldea-workflow-v0.1.0
+cd caldea-workflow-v0.1.0
+bash install.sh --version
 
 # /absolute/path/to/project를 실제 대상 프로젝트 경로로 바꾸세요.
 bash install.sh --project /absolute/path/to/project --target agents
@@ -55,8 +58,11 @@ bash install.sh --project /absolute/path/to/project --target claude --check
 | `--target agents\|claude` | 스킬 설치 위치 선택. 기본값은 `agents` |
 | `--skills-dir PATH` | 스킬 루트를 직접 지정. `--target`보다 우선 |
 | `--check` | 파일을 변경하지 않고 설치 내용 일치 여부 검사 |
+| `--version` | 체크아웃한 패키지 버전 출력, 설치하지 않음 |
 
 `--check`의 종료 코드는 일치 `0`, 누락·드리프트 `1`, 잘못된 인자·마커·경로 충돌 등 오류 `2`입니다. 설치기는 symlink 대상이나 Caldea 소유가 아닌 동명 스킬을 자동 덮어쓰지 않습니다.
+
+기존 설치는 새 태그 체크아웃에서 동일 대상·스킬 경로로 설치와 `--check`를 실행해 갱신합니다. 하네스를 재시작/reload한 뒤 실제 로드된 스킬의 `metadata.version`과 프로젝트 AGENTS의 버전을 확인하세요. 기본 홈 스킬은 여러 프로젝트가 공유할 수 있습니다. 상세 절차와 영향 범위는 [설치 지침](docs/install.md)을 따릅니다.
 
 ## 설치 후 사용
 
@@ -78,6 +84,7 @@ bash install.sh --project /absolute/path/to/project --target claude --check
 - **자동 병합은 기본 권한이 아닙니다.** [로드맵](docs/ROADMAP.md)의 별도 승격 조건과 명시적으로 승인된 권한을 따릅니다.
 - **기억 도구의 역할을 분리합니다.** ai-memory는 세션 연속성·이전 결정·인계, Mnemosyne는 구조화 지식·코드 관계를 담당합니다. 같은 질문을 양쪽에 중복 전송하지 않습니다. 상세 경계는 [권위 비교 문서](references/authority-memory-comparison.ko.md)를 따릅니다.
 - **Slack 연동은 별도 구성입니다.** 승인된 채널에만 보고하며, 그룹에서 특정 에이전트가 멘션된 요청은 해당 에이전트만 수행합니다. 제한된 Slack/Onyx 원문과 시크릿을 일반 graph나 세션 기억에 자동 합류시키지 않습니다.
+- **고효익 점검만 보강합니다.** [선별 품질 보강](skills/milestone-loop/SKILL.md#선별-품질-보강)은 모든 변경의 검증 기준 약화, 신뢰 경계 변경의 보안 위협, 성능 요구·회귀의 동일 조건 측정을 다룹니다. 별도 agent-skills 설치·라우터·훅 없이 기존 역할·권한·DoD 안에서 적용합니다. 자연어 점검만으로 CI 강제나 품질 개선이 입증되는 것은 아닙니다.
 
 ## 문서 안내
 

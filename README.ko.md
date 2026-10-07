@@ -4,6 +4,8 @@
 
 M1은 문서, 설치 가능한 `milestone-loop` 스킬, AGENTS 템플릿, 멱등 설치기를 제공한다. 실행 데몬이나 Slack 봇을 제공하지 않는다. 아래 전체 루프는 **PROPOSAL: 설치한 하네스가 수행할 운영 계약**이다. 패키지 검사 결과와 실제 외부 서비스 실행 결과는 구분한다.
 
+현재 배포는 **v0.1.0**이며 [VERSION](VERSION)과 [변경 이력](CHANGELOG.md)으로 식별한다. 설치·갱신을 맡길 하네스에는 [설치 지침](docs/install.md)의 버전 고정 절차부터 읽힌다. 루트 AGENTS/CLAUDE와 설치된 스킬·프로젝트 마커가 이 절차를 안내한다.
+
 ```text
 지시 → 마일스톤 선정 → 개발 → 검증게이트 → 커밋 → PR
      → 리뷰(최대 3라운드) → 개선 → 재검증 → PASS → 다음 마일스톤
@@ -26,9 +28,10 @@ M1은 문서, 설치 가능한 `milestone-loop` 스킬, AGENTS 템플릿, 멱등
 
 ## 빠른 시작
 
-Bash 3.2 이상, Python 3.9 이상이 필요하다. 이 저장소를 복제한 디렉터리에서 실행한다.
+Bash 3.2 이상, Python 3.9 이상이 필요하다. `v0.1.0` 태그의 새 체크아웃에서 실행하며 기존 설치도 같은 대상·스킬 경로로 재설치한다. 기존 수정본을 덮어쓰지 않는 clone·갱신 절차는 [설치 지침](docs/install.md)을 따른다.
 
 ```bash
+bash install.sh --version
 # 대상 프로젝트가 이미 있어야 한다. 기본 스킬 위치: ~/.agents/skills/
 bash install.sh --project /absolute/path/to/project --target agents
 bash install.sh --project /absolute/path/to/project --target agents --check
@@ -41,6 +44,8 @@ bash install.sh --project /absolute/path/to/project --target claude
 2. [AGENTS 작성 가이드](templates/AGENTS.md)의 프로젝트·DoD·권한 필드를 기존 AGENTS에 병합한다. Claude Code는 기존 CLAUDE.md를 보존하면서 첫 줄의 `@AGENTS.md` import를 확인한다.
 3. 하네스에 “milestone-loop 스킬로 지정 마일스톤을 수행하라”라고 지시한다. 각 필수 명령의 종료 코드와 증거 경로를 남긴다.
 4. [운영 매뉴얼](docs/workflow.md)에 따라 PASS 후 다음 마일스톤으로 진행한다. 자동 병합은 [로드맵](docs/ROADMAP.md)의 별도 승격 조건을 따른다.
+
+갱신 뒤 하네스를 재시작/reload하고 실제 로드한 스킬의 `metadata.version`과 프로젝트 AGENTS 버전을 확인한다. `--check`는 드리프트를 읽기 전용으로 표시할 뿐 갱신하지 않으며, 기본 홈 스킬 갱신은 다른 프로젝트에도 영향을 줄 수 있다.
 
 ## 구성과 검증
 
