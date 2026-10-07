@@ -100,3 +100,12 @@ $ git diff --stat
 - 루트 AGENTS와 버전 고정 설치 문서를 읽힌 도구 없는 `completion` smoke에서 모델이 `v0.1.0`, 동일 project/custom skills-dir의 설치·검사 명령, 기존 MCP/훅 보존, 재시작/reload 후 실제 metadata/마커 버전 확인을 선택했다. 파일 존재만으로 완료하지 않았다. `default` 모델의 한 시나리오 관찰이며 구체 모델 ID는 기록하지 않았다.
 
 실제 사용자 홈·전역 설치·하네스 설정은 변경하지 않았다. native 하네스의 자동 파일 발견/스킬 reload, 외부 서비스 실행 또는 운영 신뢰 단계 승격은 이 검증의 범위가 아니다. 원격 태그 체크아웃 검증은 배포 후 별도 실행 결과로 보고한다.
+
+## 2026-10-08 — v0.1.1 비공개 저장소 접근 보완
+
+- v0.1.0 배포 후 비인증 HTTPS 태그 clone은 `fatal: could not read Username for 'https://github.com': Device not configured`로 실패했다. 동일 경로를 재시도하지 않았으며 `gh repo view ... --json isPrivate,visibility`에서 PRIVATE를 확인했다.
+- 기존 SSH 인증으로 원격 `v0.1.0` 태그의 실제 clone에 성공했다. 설치 지침은 이 경로를 기본 예제로 사용하고, 승인된 HTTPS 인증은 대안으로 남긴다. 일반 web reader 대신 인증된 checkout의 문서를 읽는 경로도 명시했다.
+- 그 원격 태그 설치본을 임시 프로젝트에서 수정판 `0.1.1` 소스로 갱신했다. 설치 전 `--check` exit 1과 bytes/mtime 불변, 갱신 후 `--check` exit 0, 이전 스킬 백업·기존 프로젝트 권한 보존·metadata/마커 URL의 0.1.1 식별, `--version` 출력 `Caldea Workflow 0.1.1`을 확인했다.
+- 수정판은 버전 메타데이터와 설치 문서 변경이며 설치기/검사 로직은 v0.1.0과 같다. v0.1.0의 15개 설치 테스트 결과와 별도로 수정판의 실제 갱신 smoke를 수행했다. 임시 clone/설치는 제거했고 인증 파일·전역 Git 설정·저장소 공개 범위는 변경하지 않았다.
+
+이미 푸시한 v0.1.0 태그는 유지하며 v0.1.1을 새 revision으로 배포한다. 원격 v0.1.1 태그의 clone·설치·검사는 태그 push 이후 별도 결과로 보고한다.

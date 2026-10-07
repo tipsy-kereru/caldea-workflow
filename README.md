@@ -4,7 +4,9 @@
 
 현재 M1 패키지에는 설치 가능한 `milestone-loop` 스킬, 프로젝트 지침 템플릿, 설치기와 운영 문서가 포함됩니다. **독립 실행 애플리케이션, 실행 데몬, Slack 봇은 아닙니다.** 아래 루프는 설치한 하네스가 수행할 운영 계약이며, 패키지 설치만으로 CI·외부 서비스·자동 병합이 활성화되지는 않습니다.
 
-현재 릴리스: **v0.1.0** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치·갱신을 맡기려면 [설치 지침](docs/install.md)을 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
+현재 릴리스: **v0.1.1** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치·갱신을 맡기려면 [설치 지침](docs/install.md)을 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
+
+저장소는 비공개입니다. 읽기 권한과 기존 GitHub SSH 인증이 필요합니다. 인증된 HTTPS를 사용하는 환경의 대체 절차도 설치 지침에 있습니다.
 
 ```text
 사용자 지시 → 마일스톤 선정 → 개발 → 기계 검증 → 커밋 → PR
@@ -26,8 +28,8 @@
 **필수 환경:** Git(저장소 복제 및 커밋·PR 루프), Bash 3.2 이상, Python 3.9 이상. 설치 대상 프로젝트 디렉터리는 미리 존재해야 합니다.
 
 ```bash
-git clone --branch v0.1.0 --single-branch https://github.com/tipsy-kereru/caldea-workflow.git caldea-workflow-v0.1.0
-cd caldea-workflow-v0.1.0
+git clone --branch v0.1.1 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git caldea-workflow-v0.1.1
+cd caldea-workflow-v0.1.1
 bash install.sh --version
 
 # /absolute/path/to/project를 실제 대상 프로젝트 경로로 바꾸세요.

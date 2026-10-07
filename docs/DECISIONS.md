@@ -32,3 +32,4 @@
 - 하네스 진입점: 루트 AGENTS.md와 CLAUDE.md, 설치된 milestone-loop, 대상 Caldea 마커가 [버전 고정 설치·갱신 지침](install.md)으로 안내한다. 요청 태그 체크아웃의 버전·같은 대상/스킬 경로의 `--check`·실제 로드된 버전을 따로 확인한다.
 - 안전 경계: 기존 수정 체크아웃·프로젝트 계약·외부 연동을 덮어쓰지 않는다. 구버전은 기존 백업/멱등 설치 계약으로 갱신한다. 혼합 VERSION/스킬은 쓰기 전에 거부한다. 홈 스킬 공유 영향을 안내하며 하네스 reload 성공을 패키지 복사만으로 주장하지 않는다.
 - 배포 범위: 요청한 main 커밋·push 후 같은 revision에 annotated tag를 지정·push한다. GitHub Release 게시나 전역 설치 갱신은 이번 요청에 포함하지 않는다.
+- 배포 후 수정: 비공개 저장소의 비인증 HTTPS clone이 `could not read Username`으로 실패했고 `gh repo view ... --json isPrivate,visibility`가 PRIVATE를 확인했다. 기존 SSH 인증의 태그 clone은 성공했다. 접근 전제를 보완한 `0.1.1`을 새 커밋·태그로 배포하며 공개한 `v0.1.0`은 유지한다.

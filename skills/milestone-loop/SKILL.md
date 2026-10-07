@@ -1,7 +1,7 @@
 ---
 name: milestone-loop
 description: "사용자가 승인한 마일스톤을 개발, 기계 검증, 커밋, PR, 최대 3라운드 리뷰와 개선, 다음 마일스톤까지 Orca로 조율한다. 세션 인계와 코드 구조 질의를 분리하고 디스크 증거로 완료를 판정한다."
-metadata: {"version": "0.1.0"}
+metadata: {"version": "0.1.1"}
 ---
 <!-- caldea-workflow:managed-skill:v1 -->
 
@@ -9,7 +9,7 @@ metadata: {"version": "0.1.0"}
 
 이 스킬은 설치된 위치에서 단독으로 읽고 실행할 수 있다. 아래는 **PROPOSAL: 하네스 운영 계약**이다. 문서나 스킬 설치를 실제 CI·하네스·PR·Slack 검증 성공으로 표현하지 않는다. 사용자가 요청한 구현 범위와 프로젝트 AGENTS의 권한·DoD를 먼저 따른다.
 
-설치된 패키지 버전은 frontmatter의 `metadata.version`이다. 설치·갱신 요청이면 [이 버전의 설치 지침](https://github.com/tipsy-kereru/caldea-workflow/blob/v0.1.0/docs/install.md)을 먼저 읽고 대상 프로젝트·하네스·스킬 경로를 확인한다. 새 버전은 해당 태그의 지침과 VERSION을 확인해 설치한 뒤 `--check` 및 새 세션에서 스킬/AGENTS 버전을 확인한다. 기억·문서만으로 갱신 완료를 주장하지 않는다.
+설치된 패키지 버전은 frontmatter의 `metadata.version`이다. 설치·갱신 요청이면 [이 버전의 설치 지침](https://github.com/tipsy-kereru/caldea-workflow/blob/v0.1.1/docs/install.md)을 먼저 읽고 대상 프로젝트·하네스·스킬 경로를 확인한다. 비공개 저장소 접근은 승인된 SSH/GitHub 인증을 재사용하고 키·토큰을 읽거나 기록하지 않는다. 새 버전은 해당 태그의 지침과 VERSION을 확인해 설치한 뒤 `--check` 및 새 세션에서 스킬/AGENTS 버전을 확인한다. 기억·문서만으로 갱신 완료를 주장하지 않는다.
 
 ## 시작 조건과 역할
 
