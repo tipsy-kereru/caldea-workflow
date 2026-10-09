@@ -29,6 +29,14 @@ UI 기능은 Feature Map에 화면 진입 경로·선행 상태·관련 파일·
 - 코디네이터: `<handle/run>`; worker: `<dispatch>`; read-only reviewer: `<담당자>`.
 - 다른 작업의 파일을 덮어쓰거나 일괄 stage하지 않는다. 충돌을 발견하면 변경 범위를 확인하고 현재 합쳐진 상태로 재검증한다.
 
+## 작업 맥락
+
+- 새 task·인계·재개 시 기존 브리프/보고에 `context_start: task/dispatch, 확인 시각, 읽은 브리프·관련 최신 보고/handoff 경로/ID, 기준 head/관련 dirty diff hash(비git은 파일 hash), 범위·권한·DoD`를 남기고 실제 소스/Orca 상태와 대조한다.
+- 같은 작업의 유효한 맥락은 재사용한다. 기준·요구·담당·외부의 관련 소스 변경 때만 영향 자료를 재확인하며 매 도구 호출마다 전체 기억을 읽지 않는다.
+- 종료 시 성공·실패·BLOCKED를 포함한 `context_end: 결과 revision, 변경/실제 검증, 결정·잔여/차단, 다음 행동, 보고 경로/ID`를 기존 완료 보고에 저장한다. reviewer는 판정 응답으로 제출하고 코디네이터가 연결한다.
+- 코디네이터는 두 기록과 실제 증거가 맞는지 확인한 뒤 완료/후속 의존 작업을 허용한다. 누락·불일치면 해당 전이만 보류한다. ai-memory가 없으면 승인 브리프·리포 기록·소스로 대체하고 한계를 남기되 확인 불가 의존 작업은 BLOCKED다.
+- 받은 handoff를 다시 수락하거나 매 작업마다 finalize/new handoff를 만들지 않는다. 세션 종료와 작업별 보고는 구분하고 기존 민감 데이터·scope·revision 검증 경계를 유지한다.
+
 ## 마일스톤 DoD
 
 | ID | 검증 명령 | cwd | 기대 결과 | 증거 |
@@ -68,6 +76,7 @@ milestone-loop의 선별 품질 보강을 기존 역할과 DoD에 적용한다. 
 - 핵심 파일 `stat -f '%Sm %N' <files>` 출력. Linux는 `stat -c '%y %n'`.
 - reviewer verdict·reviewed SHA·관측 시각 또는 미실행, 잔여 위험·미검증·차단·다음 작업.
 - ai-memory exact-session 종료와 handoff 확인, Slack 발송 receipt 또는 미발송 상태.
+- context_start의 읽은 근거·기준 revision 및 context_end의 결과 revision·보고 경로/ID.
 
 supervised Dispatch에서만 preamble의 식별자로 아래 명령을 실행한다. 실패이면 outcome을 failed로 바꾼다.
 

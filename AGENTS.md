@@ -11,6 +11,7 @@
 ## Work on this repository
 
 - Read [README.md](README.md), [docs/DECISIONS.md](docs/DECISIONS.md) and the relevant implementation contract. The executable workflow lives in [skills/milestone-loop/SKILL.md](skills/milestone-loop/SKILL.md).
+- Use the workflow's task-level `context_start` and `context_end` in the existing brief/report: verify current relevant context before a new task or resume, record the result and next action at completion, and reconcile evidence before dependent work. Reuse valid context within the task; refresh only affected inputs after external changes. Do not create per-tool memory reads or per-task session finalization.
 - Before releasing, run `python3 scripts/verify.py` and `python3 scripts/test_install.py`, and exercise an isolated install/upgrade with `--skills-dir`. Preserve seeded reference documents.
 - Keep VERSION, skill metadata, its version-pinned install link and release documentation consistent. Record changes in [CHANGELOG.md](CHANGELOG.md). Commit/push/tag only when requested.
 - This root file guides agents working on the Caldea package. Do not copy it over another project's AGENTS.md; use `install.sh` and [templates/AGENTS.md](templates/AGENTS.md).

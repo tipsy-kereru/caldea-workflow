@@ -109,3 +109,22 @@ $ git diff --stat
 - 수정판은 버전 메타데이터와 설치 문서 변경이며 설치기/검사 로직은 v0.1.0과 같다. v0.1.0의 15개 설치 테스트 결과와 별도로 수정판의 실제 갱신 smoke를 수행했다. 임시 clone/설치는 제거했고 인증 파일·전역 Git 설정·저장소 공개 범위는 변경하지 않았다.
 
 이미 푸시한 v0.1.0 태그는 유지하며 v0.1.1을 새 revision으로 배포한다. 원격 v0.1.1 태그의 clone·설치·검사는 태그 push 이후 별도 결과로 보고한다.
+
+## 2026-10-09 — v0.1.2 작업 맥락 체크포인트
+
+- `context_start`: 기준 `2fab1c749dea20ca64737881f949460dd20d62f0`의 사용자 요청·루트 AGENTS·기존 스킬/설치기·템플릿·workflow·설치/변경/결정/검증 기록을 확인했다. 범위는 기존 작업 계약의 경량 보강, 패치 배포, 현재 하네스 관리 스킬 갱신이다. 새 MCP·훅·기억 backend나 다른 프로젝트 설정 변경은 제외한다.
+- `python3 scripts/verify.py`: 최초 실행에서 DECISIONS의 EOF 공백 실패를 확인하고 제거했다. 수정 후 exit 0, 산출물 8개·문서 상대 링크 71개·frontmatter/version·Bash 구문·diff 공백·시딩 4개 SHA-256 통과. `--source-links`는 미실행.
+- `python3 scripts/test_install.py`: exit 0, 15 tests OK. `bash install.sh --version`: exit 0, `Caldea Workflow 0.1.2`.
+- 실제 `v0.1.1` 태그 설치기를 git archive로 임시 경로에 추출해 설치한 뒤 `0.1.2` 소스로 갱신했다. 설치 전 `--check` exit 1과 bytes/mtime 불변, 갱신 후 `--check` exit 0, 구버전 스킬 백업·프로젝트 권한 문구 보존·스킬/마커의 체크포인트 배포·0.1.2 metadata/태그 URL·재설치 bytes/mtime 불변을 확인했다. 임시 경로는 제거했다.
+- 실제 설치된 스킬을 system 입력으로 사용한 도구 없는 `completion` smoke에서 아래 네 가상 입력의 응답을 관찰했다. 모델 선택은 `default`이고 구체 모델 ID는 기록하지 않았으므로 정량 Eval로 취급하지 않는다.
+
+| 가상 입력 | 관측한 행동 결정 |
+|---|---|
+| 재개 시 handoff 기준과 실제 head 불일치, 다른 worker의 같은 파일 변경 | 영향 자료 재확인·충돌 작업 보류·context_start 갱신; handoff 재수락 없음 |
+| 같은 task의 맥락·revision 유효, 외부 관련 변경 없음 | 기존 맥락 재사용; 다음 도구 호출마다 전체 기억 조회 없음 |
+| 구현/DoD 증거는 있으나 context_end 보고 누락 | 완료 및 후속 의존 task 보류; 독립 task는 자체 시작 조건 확인 후 계속 |
+| 기억 backend 없는 read-only reviewer, 필수 DoD 실패 | 브리프/소스로 한계 명시·BLOCKED 종료 판정 응답 제출·코디네이터 연결; 공유 수정/작업별 finalize 없음 |
+
+- `context_end`: 결과는 VERSION `0.1.2`의 스킬·관리 마커·템플릿·운영 계약·배포 안내 보강이다. 검증 근거와 결정은 이 보고 및 [D005](DECISIONS.md#d005--작업-단위-맥락-체크포인트)에 남긴다. 다음 행동은 같은 변경 revision의 커밋·push·새 태그와 게시된 태그의 실제 설치/현재 관리 스킬 갱신이며, 그 결과는 배포 완료 보고에서 확인한다.
+
+한계: 이 패키지는 하네스 운영 계약이다. 가상 입력의 증거는 fixture이며 smoke는 지침을 읽은 모델의 응답만 증명한다. native 자동 발견/reload·Orca 상태 전이 강제·CI·실제 기억 서버 실행·운영 비용/결함 감소를 증명하지 않는다. 매 작업의 기억 서버 쓰기나 세션 종료도 추가하지 않았다.

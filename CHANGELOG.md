@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2 - 2026-10-09
+
+### Improvements
+
+- Add task-level `context_start` and `context_end` to the existing brief/report. Verify relevant current evidence before new work, handoff or resume; reconcile the completion report before dependent work.
+- Reuse valid context within a task and refresh only affected inputs after external changes. Record failed/blocked outcomes too; preserve read-only review, revision gates, memory scope and session lifecycle boundaries.
+- Distribute the checkpoints through the self-contained skill, managed AGENTS routing, project template and workflow guide. No new hooks, memory backend, router or per-tool recall loop.
+
 ## 0.1.1 - 2026-10-08
 
 ### Fixes

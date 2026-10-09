@@ -4,7 +4,7 @@
 
 ## 0. 버전 고정 설치·갱신
 
-현재 배포 버전은 **0.1.1**, 태그는 **v0.1.1**이다. [VERSION](../VERSION)이 패키지 버전 정본이며 [변경 이력](../CHANGELOG.md)을 함께 읽는다. 저장소 루트의 AGENTS.md/CLAUDE.md는 이 문서로 라우팅하고, 설치기는 대상 AGENTS 마커에 버전과 해당 태그의 설치 지침 URL을 기록한다. 설치된 스킬의 `metadata.version`으로 로드한 버전을 식별한다.
+현재 배포 버전은 **0.1.2**, 태그는 **v0.1.2**이다. [VERSION](../VERSION)이 패키지 버전 정본이며 [변경 이력](../CHANGELOG.md)을 함께 읽는다. 저장소 루트의 AGENTS.md/CLAUDE.md는 이 문서로 라우팅하고, 설치기는 대상 AGENTS 마커에 버전과 해당 태그의 설치 지침 URL을 기록한다. 설치된 스킬의 `metadata.version`으로 로드한 버전을 식별한다.
 
 ### 새 설치 또는 기존 패키지 갱신
 
@@ -13,9 +13,9 @@
 릴리스 태그의 새 체크아웃을 사용한다. 기존 체크아웃에 미커밋 변경이 있으면 checkout/reset/pull로 덮어쓰지 않는다. 아래 clone 목적지는 아직 없는 디렉터리로 정한다.
 
 ```bash
-git clone --branch v0.1.1 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git /absolute/tools/caldea-workflow-v0.1.1
+git clone --branch v0.1.2 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git /absolute/tools/caldea-workflow-v0.1.2
 # 새 체크아웃을 cwd로 사용
-cd /absolute/tools/caldea-workflow-v0.1.1
+cd /absolute/tools/caldea-workflow-v0.1.2
 git describe --tags --exact-match
 bash install.sh --version
 # 대상 프로젝트·target·기존 비표준 skills-dir을 확인한 뒤:
@@ -23,13 +23,13 @@ bash install.sh --project /absolute/project --target agents
 bash install.sh --project /absolute/project --target agents --check
 ```
 
-tag는 `v0.1.1`, installer 출력은 `Caldea Workflow 0.1.1`이어야 한다. Claude Code 전용 경로는 두 설치 명령 모두 `--target claude`로 바꾼다. 기존에 `--skills-dir`을 사용했다면 설치와 검사에 같은 절대 경로를 전달한다. VERSION과 스킬 frontmatter 버전이 다르면 설치기는 쓰기 전에 exit 2로 거부한다.
+tag는 `v0.1.2`, installer 출력은 `Caldea Workflow 0.1.2`이어야 한다. Claude Code 전용 경로는 두 설치 명령 모두 `--target claude`로 바꾼다. 기존에 `--skills-dir`을 사용했다면 설치와 검사에 같은 절대 경로를 전달한다. VERSION과 스킬 frontmatter 버전이 다르면 설치기는 쓰기 전에 exit 2로 거부한다.
 
 기존 Caldea도 같은 명령으로 갱신한다. 먼저 `--check`를 실행해 드리프트(exit 1)를 볼 수 있지만 검사는 갱신하지 않는다. 실제 설치는 관리 스킬과 Caldea 마커만 백업 후 교체하며 마커 밖의 프로젝트 규칙·권한·DoD를 보존한다. **사용자 홈의 스킬은 여러 프로젝트가 공유할 수 있다.** `agents`/`claude` 기본 경로를 갱신할 때 공유 영향을 확인하고, 격리가 필요하면 해당 하네스가 읽는 프로젝트별 스킬 경로를 확인해 `--skills-dir`을 사용한다. 패키지 갱신만으로 기존 MCP·훅·서버·Orca를 재설치하지 않는다.
 
 ### 하네스 인식과 완료 증거
 
-선택한 하네스를 재시작하거나 실제 지원하는 reload 절차를 수행한다. 새 세션에서 대상 프로젝트 AGENTS.md의 Caldea 버전과 **실제로 읽힌** milestone-loop의 `metadata.version`이 모두 `0.1.1`인지 확인한다. 중복 스킬이나 다른 skills-dir이 먼저 로드되면 경로를 조정하고 다시 확인한다. 기존 세션이 기억하는 구버전 설명을 새 버전 로드 증거로 쓰지 않는다.
+선택한 하네스를 재시작하거나 실제 지원하는 reload 절차를 수행한다. 새 세션에서 대상 프로젝트 AGENTS.md의 Caldea 버전과 **실제로 읽힌** milestone-loop의 `metadata.version`이 모두 `0.1.2`인지 확인한다. 중복 스킬이나 다른 skills-dir이 먼저 로드되면 경로를 조정하고 다시 확인한다. 기존 세션이 기억하는 구버전 설명을 새 버전 로드 증거로 쓰지 않는다.
 
 보고에는 `요청 tag / package --version / project / harness / 실제 skill path / loaded metadata.version / --check exit / backup / 남은 외부 설정`을 남긴다. 패키지 설치와 실제 하네스 로드, 기존 외부 서비스 동작은 별도 판정한다. 다른 프로젝트에 지침을 전달할 때 루트 AGENTS.md를 통째로 복사하지 않고 이 문서를 읽힌 뒤 설치기의 관리 마커와 템플릿을 사용한다.
 

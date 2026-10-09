@@ -4,7 +4,7 @@
 
 현재 M1 패키지에는 설치 가능한 `milestone-loop` 스킬, 프로젝트 지침 템플릿, 설치기와 운영 문서가 포함됩니다. **독립 실행 애플리케이션, 실행 데몬, Slack 봇은 아닙니다.** 아래 루프는 설치한 하네스가 수행할 운영 계약이며, 패키지 설치만으로 CI·외부 서비스·자동 병합이 활성화되지는 않습니다.
 
-현재 릴리스: **v0.1.1** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치·갱신을 맡기려면 [설치 지침](docs/install.md)을 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
+현재 릴리스: **v0.1.2** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치·갱신을 맡기려면 [설치 지침](docs/install.md)을 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
 
 저장소는 비공개입니다. 읽기 권한과 기존 GitHub SSH 인증이 필요합니다. 인증된 HTTPS를 사용하는 환경의 대체 절차도 설치 지침에 있습니다.
 
@@ -19,6 +19,7 @@
 ## 제공하는 것
 
 - **마일스톤 실행 절차:** 범위·완료 조건(DoD)·권한을 확인하고, 검증과 리뷰 증거를 남기는 `milestone-loop` 스킬.
+- **작업 맥락 체크포인트:** 새 작업·인계·재개 때 최신 근거를 확인하고 종료 보고를 남깁니다. 같은 작업의 유효한 맥락은 재사용하며, 코디네이터가 증거를 대조한 뒤 후속 의존 작업을 허용합니다.
 - **프로젝트 지침:** 기존 `AGENTS.md`에 병합할 게이트·보고·실패 복구 규칙.
 - **멱등 설치기:** 스킬 복사, AGENTS 관리 블록 갱신, 변경 전 백업, 읽기 전용 설치 상태 검사.
 - **운영 가이드:** 하네스별 MCP·훅 연결, 기억 도구 역할 분리, 승인된 Slack 채널 보고와 단계별 자동화 승격 조건.
@@ -28,8 +29,8 @@
 **필수 환경:** Git(저장소 복제 및 커밋·PR 루프), Bash 3.2 이상, Python 3.9 이상. 설치 대상 프로젝트 디렉터리는 미리 존재해야 합니다.
 
 ```bash
-git clone --branch v0.1.1 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git caldea-workflow-v0.1.1
-cd caldea-workflow-v0.1.1
+git clone --branch v0.1.2 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git caldea-workflow-v0.1.2
+cd caldea-workflow-v0.1.2
 bash install.sh --version
 
 # /absolute/path/to/project를 실제 대상 프로젝트 경로로 바꾸세요.
