@@ -128,3 +128,22 @@ $ git diff --stat
 - `context_end`: 결과는 VERSION `0.1.2`의 스킬·관리 마커·템플릿·운영 계약·배포 안내 보강이다. 검증 근거와 결정은 이 보고 및 [D005](DECISIONS.md#d005--작업-단위-맥락-체크포인트)에 남긴다. 다음 행동은 같은 변경 revision의 커밋·push·새 태그와 게시된 태그의 실제 설치/현재 관리 스킬 갱신이며, 그 결과는 배포 완료 보고에서 확인한다.
 
 한계: 이 패키지는 하네스 운영 계약이다. 가상 입력의 증거는 fixture이며 smoke는 지침을 읽은 모델의 응답만 증명한다. native 자동 발견/reload·Orca 상태 전이 강제·CI·실제 기억 서버 실행·운영 비용/결함 감소를 증명하지 않는다. 매 작업의 기억 서버 쓰기나 세션 종료도 추가하지 않았다.
+
+## 2026-10-13 — v0.2.0 응답 표현 스킬 통합
+
+- `context_start`: clean `main` 기준 `0322ca7`에서 사용자 요청·루트 AGENTS·README·설치 계약·스킬·설치기·테스트·결정/검증 기록을 대조했다. upstream `ayghri/i-have-adhd`의 `1ecea1993b7fce257ffbd686c070948b5e07eda6` SKILL과 MIT LICENSE를 확인했다. 범위는 한국어 Caldea 응답 스킬·설치/AGENTS 연결·설치 지침·버전 갱신·커밋/push이며 다른 프로젝트 규칙·MCP·훅·플러그인·자동 병합 변경은 제외한다. 정확한 프로젝트 기억 scope를 선언한 marker가 없어 global 기억 검색을 사용했으나 관련 결정 근거는 얻지 못했으며 현재 소스와 리포 기록을 기준으로 삼았다.
+- `python3 scripts/verify.py`: exit 0. 필수 산출물 10개·상대 링크 80개·두 스킬의 frontmatter/version·Bash 구문·diff 공백·시딩 4개 SHA-256 통과. `--source-links`는 미실행이다.
+- `python3 scripts/test_install.py`: exit 0, 23 tests OK. 두 번째 스킬/라이선스 드리프트·복구·백업·mode 보존, 비관리 동명 스킬/라이선스-only 충돌의 쓰기 전 거부, 누락/빈 source LICENSE, 두 스킬 혼합 버전, symlink 충돌 및 기존 설치 계약을 검사했다. `bash install.sh --version`: exit 0, `Caldea Workflow 0.2.0`.
+- 실제 `v0.1.2` 태그를 git archive로 임시 경로에 추출해 설치한 뒤 `0.2.0` 설치기로 갱신했다. 갱신 전 `--check` exit 1과 bytes/mtime 불변, 갱신 후 `--check` exit 0, 두 스킬 metadata 0.2.0·동봉 MIT LICENSE 일치·이전 스킬 백업·프로젝트 권한 문구 보존·재설치 UNCHANGED와 bytes/mtime 불변을 확인했다.
+- 같은 격리 스킬 루트를 사용해 리포 자체 AGENTS의 관리 블록을 준비하고 `--check` exit 0을 확인했다. 기존 리포 계약을 그대로 보존했다. 이 준비 과정은 사용자 홈의 스킬을 바꾸지 않았고 준비용 AGENTS 백업은 보존 내용을 확인한 후 제거했다.
+- 임시 설치된 응답 스킬과 AGENTS를 system 입력으로 읽힌 도구 없는 `completion` smoke를 수행했다. `default` 모델 선택이며 구체 모델 ID는 기록하지 않았으므로 정량 Eval로 취급하지 않는다.
+
+| 가상 입력 | 실제 응답에서 관측한 결과 |
+|---|---|
+| 원인 미확인인 일곱 검증 실패의 전체 보고 요청 | 7개 명령·exit·실패를 모두 표에 표시, 원인 미확인 유지, 완료 판정 거부, 다음 조사 행동 하나 |
+| exit 0/1/2와 0.1.2→0.2.0 갱신/로드 차이의 상세 설명 요청 | 짧은 목록 제한으로 설명을 자르지 않고 제목·단계·표로 설명, 가상 결과임을 명시, 파일 설치/검사/실제 로드 증거를 구분 |
+| `normal mode`, 번호 없이 한 문장 확인 요청 | 일반 문단 응답과 명시적 재요청 전 비활성화를 한 문장으로 확인 |
+
+- `context_end`: 결과 VERSION `0.2.0`에서 두 스킬과 LICENSE·관리 AGENTS·템플릿·설치/운영 안내를 통합했고 [D006](DECISIONS.md#d006--이해하기-쉬운-응답-표현-스킬-배포)에 출처·권한 경계를 기록했다. 다음 행동은 같은 revision의 커밋·annotated tag·원격 push, 게시된 태그의 실제 checkout/설치/검사 및 요청한 현재 하네스 스킬 갱신이다. 배포와 실제 설치 결과는 최종 응답에 별도로 기록한다.
+
+한계: 모델 smoke는 가상 입력에 대한 지침 적용 관찰이지 native 스킬 자동 발견/reload·세션 간 지속성·실제 이해도 개선의 증거가 아니다. 실제 하네스 재시작 및 두 스킬의 새 세션 로드는 파일 검사와 분리해 판정한다. upstream 플러그인·훅·npm 패키지·MCP·외부 서비스는 설치하지 않았고 민감 데이터 전송이나 운영 신뢰 단계 승격도 추가하지 않았다.

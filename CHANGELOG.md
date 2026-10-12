@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.0 - 2026-10-13
+
+### Features
+
+- Bundle a Korean Caldea-adapted `i-have-adhd` response skill from ayghri/i-have-adhd, pinned to revision `1ecea1993b7fce257ffbd686c070948b5e07eda6`, with its MIT license. Lead with actionable answers, number steps, make results visible and group long lists without hiding required evidence.
+- Install and read-only check both managed skills and the response skill license. Preserve unmanaged skill collisions, project rules, backups, idempotency and preflight validation; no upstream plugin, hook or runtime download.
+
+### Documentation
+
+- Apply accessible response defaults through the installed AGENTS marker, milestone loop, project template and installation guidance, including non-milestone replies, user language/format overrides, full explanations and normal-mode opt-out.
+- Preserve permissions, DoD, same-revision review and machine-readable reports. Require separate verification of both loaded skill versions rather than treating copied files as native harness activation.
+
 ## 0.1.2 - 2026-10-09
 
 ### Improvements

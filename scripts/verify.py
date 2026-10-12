@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DELIVERABLES = [
     'README.ko.md', 'docs/00-research.md', 'docs/ROADMAP.md',
     'docs/install.md', 'docs/workflow.md', 'templates/AGENTS.md',
-    'skills/milestone-loop/SKILL.md', 'install.sh',
+    'skills/milestone-loop/SKILL.md', 'skills/i-have-adhd/SKILL.md',
+    'skills/i-have-adhd/LICENSE', 'install.sh',
 ]
 
 
@@ -91,16 +92,19 @@ def main():
         except ValueError as error:
             errors.append(str(error))
     # frontmatter는 표준 라이브러리로 읽을 수 있는 JSON-compatible 값만 사용한다.
-    skill = (ROOT / 'skills/milestone-loop/SKILL.md').read_text()
-    front = re.match(r'\A---\nname: ([a-z0-9-]+)\ndescription: ("[^\n]+")\nmetadata: (\{[^\n]+\})\n---\n', skill)
     try:
         version = (ROOT / 'VERSION').read_text(encoding='utf-8').strip()
         if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version):
             raise ValueError('유효한 패키지 VERSION 없음')
-        if not front or front[1] != 'milestone-loop' or not json.loads(front[2]):
-            raise ValueError('유효한 name/description YAML frontmatter 없음')
-        if json.loads(front[3]).get('version') != version:
-            raise ValueError('VERSION과 스킬 metadata.version 불일치')
+        for name in ('milestone-loop', 'i-have-adhd'):
+            skill = (ROOT / 'skills' / name / 'SKILL.md').read_text(encoding='utf-8')
+            front = re.match(r'\A---\nname: ([a-z0-9-]+)\ndescription: ("[^\n]+")\nmetadata: (\{[^\n]+\})\n---\n', skill)
+            if not front or front[1] != name or not json.loads(front[2]):
+                raise ValueError(f'{name}: 유효한 name/description YAML frontmatter 없음')
+            if json.loads(front[3]).get('version') != version:
+                raise ValueError(f'{name}: VERSION과 스킬 metadata.version 불일치')
+            if '<!-- caldea-workflow:managed-skill:v1 -->' not in skill:
+                raise ValueError(f'{name}: Caldea 소유 마커 없음')
     except (OSError, ValueError, TypeError, AttributeError) as error:
         errors.append(str(error))
     if subprocess.run(['bash', '-n', str(ROOT / 'install.sh')], cwd=ROOT).returncode:
@@ -136,7 +140,7 @@ def main():
         print('FAIL:', error)
     if errors:
         return 1
-    print(f'PASS: 필수 산출물 8개(각 100자 이상), 새 문서 상대 링크 {count}개, YAML frontmatter, Bash 구문, diff 공백, 시딩 4개 SHA-256')
+    print(f'PASS: 필수 산출물 {len(DELIVERABLES)}개(각 100자 이상), 새 문서 상대 링크 {count}개, 두 스킬 YAML frontmatter/version, Bash 구문, diff 공백, 시딩 4개 SHA-256')
     if args.source_links:
         print(f'PASS: 시딩 원본 경로 기준 링크 {source_count}개, 로컬 필독 자료 9개 hash 일치')
     else:

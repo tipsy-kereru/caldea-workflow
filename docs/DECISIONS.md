@@ -41,3 +41,11 @@
 - 비용 경계: 같은 작업의 유효한 맥락은 재사용한다. 외부 관련 변경 때 영향 자료만 다시 읽으며 매 도구 호출의 전체 기억 조회, 별도 상태 파일 체계·훅·라우터·추가 리뷰 루프는 만들지 않는다.
 - 안전 경계: 실패/BLOCKED도 종료 보고를 남긴다. reviewer는 판정 응답만 제출하고 코디네이터가 연결한다. 기존 DoD·동일 head PASS·최대 3라운드·scope·민감 데이터 규칙을 유지하며 작업 보고와 세션 handoff/finalize를 구분한다.
 - 배포: main 커밋·push와 새 annotated tag 후 현재 하네스의 관리 스킬을 기존 설치기로 백업·갱신한다. 다른 프로젝트 AGENTS나 다른 하네스 설정·MCP·훅은 변경하지 않는다. 실제 설치/로드 확인과 자동 강제 실행은 별도 판정한다.
+
+## D006 — 이해하기 쉬운 응답 표현 스킬 배포
+
+- 상태: **승인**, 2026-10-13, 사용자 요청 “i-have-adhd를 Caldea Workflow에 통합하고 AGENTS.md 응답을 이해하기 쉽게” 및 버전 갱신·remote push.
+- 출처: [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd/tree/1ecea1993b7fce257ffbd686c070948b5e07eda6), [upstream SKILL.md](https://github.com/ayghri/i-have-adhd/blob/1ecea1993b7fce257ffbd686c070948b5e07eda6/skills/i-have-adhd/SKILL.md), [MIT LICENSE](https://github.com/ayghri/i-have-adhd/blob/1ecea1993b7fce257ffbd686c070948b5e07eda6/LICENSE). Pinned revision `1ecea1993b7fce257ffbd686c070948b5e07eda6`; Copyright (c) 2026 Ayoub Ghriss. Caldea의 한국어 표현 규칙으로 적응하고 라이선스를 함께 배포한다. 사용자의 ADHD 진단이나 특성을 가정하지 않는다.
+- 통합: `0.2.0`에서 기존 `milestone-loop`와 별도 `i-have-adhd` 스킬 및 MIT LICENSE를 한 설치기로 복사·검사한다. 기존 AGENTS의 관리 마커 밖 내용은 보존한다. 마일스톤 밖에도 읽기 쉬운 표현을 사용하지만 명시적인 사용자 언어·형식·길이 요청과 일반 모드 opt-out이 우선한다.
+- 안전 경계: 기존 비관리 동명 upstream 스킬을 덮어쓰지 않고 승인된 격리 `--skills-dir`과 실제 하네스의 발견 우선순위를 확인한다. upstream 플러그인·훅·npm 패키지·네트워크 fetch·전역 설정은 자동 설치하지 않는다. DoD·권한·동일 head PASS·리뷰 라운드·필수 보고 스키마와 증거에는 변경이 없다.
+- 배포 범위: 요청한 `0.2.0` main 커밋·push와 같은 revision의 annotated tag·push. GitHub Release 게시는 포함하지 않으며 다른 프로젝트 설치나 외부 연동 변경도 포함하지 않는다. 설치 복사·`--check`와 실제 하네스 reload·두 스킬의 로드 확인은 별도 증거로 판단한다.

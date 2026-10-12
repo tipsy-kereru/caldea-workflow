@@ -39,6 +39,13 @@ snippet = '''<!-- caldea-workflow:start -->
 ## 칼데아 워크플로우 라우팅
 패키지 버전: {version}. 설치·갱신은 https://github.com/tipsy-kereru/caldea-workflow/blob/v{version}/docs/install.md 를 먼저 읽고 대상 프로젝트·하네스·스킬 경로를 확인한다.
 마일스톤 구현 요청에는 설치된 milestone-loop 스킬을 읽고 프로젝트의 범위·DoD·권한을 따른다.
+응답 형식에는 설치된 i-have-adhd 스킬을 먼저 읽고 적용한다. 사용자가 일반 모드 또는 ADHD 모드 중지를 요청하면 중단하고, 명시적으로 다시 요청하면 재개한다. 사용자 언어·지정 형식·설명 길이와 시스템·하네스 요구가 우선한다.
+### 이해하기 쉬운 응답
+답·결과·행동을 먼저 말한다. 여러 단계는 번호를 매겨 짧고 끝이 보이게 쓰고, 긴 목록은 약 5개씩 묶되 필수 증거·오류·위험은 생략하지 않는다.
+진행 상황은 기존 작업 체크리스트로 보여 주며 중복 설명하지 않는다. 오류는 위치·원인·해결 방법을 밝히고 불확실한 원인은 추정이라고 표시한다.
+남은 일이 있을 때만 다음 행동 하나를 제시한다. 완료된 일에 인위적인 다음 단계를 붙이지 않는다. 무관한 서론·인사·곁가지는 생략한다. 시간 추정은 근거가 있고 유용할 때만 제시한다.
+표현 규칙은 권한·DoD·동일 revision PASS·리뷰 상한이나 JSON·worker_done 등 기계 보고 필드를 바꾸지 않는다.
+### 실행 계약
 지시→선정→개발→기계 검증→커밋→PR→리뷰→개선→재검증→다음 마일스톤 순서로 진행한다.
 리뷰는 첫 판정 포함 최대 3라운드이며 최종 PASS와 같은 revision의 필수 검증 증거가 있어야 완료한다.
 선별 품질 보강: 모든 변경의 검증 기준 약화, 신뢰 경계 변경의 보안 위협, 성능 요구/회귀의 동일 조건 측정을 milestone-loop에 따라 점검하고 적용 여부·근거·증거를 보고한다. reviewer는 읽기 전용이며 별도 라우터·훅·권한을 추가하지 않는다.
@@ -109,28 +116,50 @@ def main():
         raise ValueError(f'대상 프로젝트가 존재하지 않습니다: {project}')
     skill_root = safe_path(Path(args.skills_dir) if args.skills_dir else
                            Path.home() / ('.agents' if args.target == 'agents' else '.claude') / 'skills')
-    source = package / 'skills/milestone-loop/SKILL.md'
-    expected_skill = source.read_bytes()
-    if owner not in expected_skill or not expected_skill.startswith(b'---\n'):
-        raise ValueError('패키지 스킬 원본의 frontmatter/소유 마커가 없습니다.')
-    if not re.match(rb'\A---\nname: milestone-loop\ndescription: [^\n]+\nmetadata: \{"version": "' +
-                    re.escape(version.encode('utf-8')) + rb'"\}\n---\n', expected_skill):
-        raise ValueError('VERSION과 스킬 metadata.version이 일치하지 않습니다.')
-    skill = safe_path(skill_root / 'milestone-loop/SKILL.md')
-    if skill == source.resolve():
-        raise ValueError('원본 스킬 경로를 설치 대상으로 사용할 수 없습니다.')
+    skill_specs = (
+        ('milestone-loop', ('SKILL.md',)),
+        ('i-have-adhd', ('SKILL.md', 'LICENSE')),
+    )
+    sources = {}
+    for name, files in skill_specs:
+        for filename in files:
+            source = safe_path(package / 'skills' / name / filename)
+            content = read_file(source)
+            if not content:
+                raise ValueError(f'패키지 필수 파일이 없거나 비어 있습니다: {source}')
+            sources[(name, filename)] = (source, content)
+        expected_skill = sources[(name, 'SKILL.md')][1]
+        if owner not in expected_skill or not expected_skill.startswith(b'---\n'):
+            raise ValueError(f'패키지 스킬 원본의 frontmatter/소유 마커가 없습니다: {name}')
+        if not re.match(rb'\A---\nname: ' + re.escape(name.encode('utf-8')) +
+                        rb'\ndescription: [^\n]+\nmetadata: \{"version": "' +
+                        re.escape(version.encode('utf-8')) + rb'"\}\n---\n', expected_skill):
+            raise ValueError(f'VERSION과 스킬 metadata.version이 일치하지 않습니다: {name}')
     agents = safe_path(project / 'AGENTS.md')
-    previous_agents, previous_skill = read_file(agents), read_file(skill)
+    previous_agents = read_file(agents)
     expected_agents = merge_agents(previous_agents)
-    if previous_skill is not None and owner not in previous_skill:
-        raise ValueError(f'Caldea 소유가 아닌 동명 스킬을 보존합니다: {skill}')
-    planned = [(skill, previous_skill, expected_skill), (agents, previous_agents, expected_agents)]
+    planned = []
+    for name, files in skill_specs:
+        skill = safe_path(skill_root / name / 'SKILL.md')
+        skill_previous = read_file(skill)
+        if skill_previous is not None and owner not in skill_previous:
+            raise ValueError(f'Caldea 소유가 아닌 동명 스킬을 보존합니다: {skill}')
+        for filename in files:
+            path = safe_path(skill_root / name / filename)
+            source, expected = sources[(name, filename)]
+            if path == source or path == agents or agents == source:
+                raise ValueError(f'원본 스킬 경로를 설치 대상으로 사용할 수 없습니다: {path}')
+            previous = skill_previous if filename == 'SKILL.md' else read_file(path)
+            if filename == 'LICENSE' and previous is not None and skill_previous is None:
+                raise ValueError(f'Caldea 소유가 아닌 LICENSE를 보존합니다: {path}')
+            planned.append((path, previous, expected))
+    planned.append((agents, previous_agents, expected_agents))
     drift = [(path, old, new) for path, old, new in planned if old != new]
     if args.check:
         for path, _, _ in drift:
             print(f'MISSING_OR_DRIFT: {path}')
         if not drift:
-            print('PASS: 스킬과 AGENTS 마커 일치 (읽기 전용 검사)')
+            print('PASS: 두 스킬, LICENSE와 AGENTS 마커 일치 (읽기 전용 검사)')
         return 1 if drift else 0
     if not drift:
         print('UNCHANGED: 이미 같은 내용으로 설치되어 있습니다.')
