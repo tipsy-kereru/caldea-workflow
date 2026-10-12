@@ -25,6 +25,7 @@ class InstallContract(unittest.TestCase):
         self.skill = self.skills / 'milestone-loop/SKILL.md'
         self.adhd = self.skills / 'i-have-adhd/SKILL.md'
         self.license = self.adhd.parent / 'LICENSE'
+        self.update = self.skills / 'caldea-update/SKILL.md'
 
     def run_install(self, *extra, code=0, target='agents', project=None, skills=None):
         process = subprocess.run(
@@ -34,6 +35,15 @@ class InstallContract(unittest.TestCase):
         )
         self.assertEqual(process.returncode, code, process.stdout + process.stderr)
         return process
+
+    def package_copy(self, name):
+        package = self.root / name
+        (package / 'skills').mkdir(parents=True)
+        shutil.copy2(ROOT / 'install.sh', package / 'install.sh')
+        shutil.copy2(ROOT / 'VERSION', package / 'VERSION')
+        for skill in ('milestone-loop', 'i-have-adhd', 'caldea-update'):
+            shutil.copytree(ROOT / 'skills' / skill, package / 'skills' / skill)
+        return package
 
     def snapshot(self):
         return {str(p.relative_to(self.root)): (p.read_bytes(), p.stat().st_mtime_ns)
@@ -105,6 +115,7 @@ class InstallContract(unittest.TestCase):
         self.assertEqual(list(self.skill.parent.glob('SKILL.md.bak-*'))[0].read_bytes(), prior)
         self.assertEqual(sibling.read_text(), 'keep')
         self.assertTrue(self.adhd.is_file())
+        self.assertTrue(self.update.is_file())
         self.assertTrue(self.license.is_file())
         self.assertTrue(self.agents.read_bytes().startswith(b'user prefix\n'))
         self.assertTrue(self.agents.read_bytes().endswith(b'user suffix\n'))
@@ -112,21 +123,25 @@ class InstallContract(unittest.TestCase):
         self.run_install()
         self.assertEqual(before, self.snapshot())
 
-    def test_second_skill_and_license_drift_are_detected_and_backed_up(self):
+    def test_other_skills_and_license_drift_are_detected_and_backed_up(self):
         self.run_install()
         changed_skill = self.adhd.read_bytes() + b'\nlocal change\n'
         changed_license = self.license.read_bytes() + b'\nlocal license\n'
+        changed_update = self.update.read_bytes() + b'\nlocal update change\n'
         self.adhd.write_bytes(changed_skill)
         self.license.write_bytes(changed_license)
+        self.update.write_bytes(changed_update)
         self.license.chmod(0o640)
         before = self.snapshot()
         result = self.run_install('--check', code=1)
         self.assertIn(str(self.adhd), result.stdout)
         self.assertIn(str(self.license), result.stdout)
+        self.assertIn(str(self.update), result.stdout)
         self.assertEqual(before, self.snapshot())
         self.run_install()
         self.run_install('--check')
         self.assertEqual(list(self.adhd.parent.glob('SKILL.md.bak-*'))[0].read_bytes(), changed_skill)
+        self.assertEqual(list(self.update.parent.glob('SKILL.md.bak-*'))[0].read_bytes(), changed_update)
         self.assertEqual(list(self.adhd.parent.glob('LICENSE.bak-*'))[0].read_bytes(), changed_license)
         self.assertEqual(stat.S_IMODE(self.license.stat().st_mode), 0o640)
 
@@ -152,6 +167,19 @@ class InstallContract(unittest.TestCase):
             self.assertFalse(self.agents.exists())
             self.assertFalse(self.skill.exists())
 
+    def test_unmanaged_update_collision_refused_before_earlier_drift_or_agents_write(self):
+        self.skill.parent.mkdir(parents=True)
+        self.skill.write_bytes((ROOT / 'skills/milestone-loop/SKILL.md').read_bytes() + b'\nlocal drift\n')
+        self.agents.write_text('user rules\n')
+        self.update.parent.mkdir(parents=True)
+        self.update.write_text('user-owned update skill\n')
+        before = self.snapshot()
+        for extra in ((), ('--check',)):
+            self.run_install(*extra, code=2)
+            self.assertEqual(before, self.snapshot())
+            self.assertFalse(self.adhd.exists())
+            self.assertFalse(self.license.exists())
+
     def test_license_only_target_is_not_adopted(self):
         self.license.parent.mkdir(parents=True)
         self.license.write_text('user license')
@@ -172,6 +200,19 @@ class InstallContract(unittest.TestCase):
         self.assertEqual(other.read_text(), 'do not replace')
         self.assertFalse(self.agents.exists())
         self.assertFalse(self.skill.exists())
+
+    def test_update_symlink_refused_before_any_write(self):
+        self.update.parent.mkdir(parents=True)
+        other = self.root / 'user-update'
+        other.write_text('do not replace')
+        self.update.symlink_to(other)
+        before = self.snapshot()
+        for extra in ((), ('--check',)):
+            self.run_install(*extra, code=2)
+            self.assertEqual(before, self.snapshot())
+            self.assertEqual(other.read_text(), 'do not replace')
+            self.assertFalse(self.agents.exists())
+            self.assertFalse(self.skill.exists())
 
     def test_second_skill_sibling_preserved(self):
         self.run_install()
@@ -226,6 +267,8 @@ class InstallContract(unittest.TestCase):
         claude_root = self.root / '.claude/skills'
         self.run_install(target='claude', skills=claude_root)
         self.assertTrue((claude_root / 'milestone-loop/SKILL.md').is_file())
+        self.assertTrue((claude_root / 'i-have-adhd/SKILL.md').is_file())
+        self.assertTrue((claude_root / 'caldea-update/SKILL.md').is_file())
         self.assertEqual(first, self.agents.read_bytes())
         self.assertEqual(first.count(START), 1)
         self.run_install('--check', target='claude', skills=claude_root)
@@ -264,13 +307,9 @@ class InstallContract(unittest.TestCase):
         self.assertEqual(sibling.read_text(), '추가 파일 보존')
 
     def test_mixed_package_versions_fail_before_writes(self):
-        for updated in ('milestone-loop', 'i-have-adhd'):
+        for updated in ('milestone-loop', 'i-have-adhd', 'caldea-update'):
             with self.subTest(updated=updated):
-                package = self.root / ('mixed ' + updated)
-                (package / 'skills').mkdir(parents=True)
-                shutil.copy2(ROOT / 'install.sh', package / 'install.sh')
-                shutil.copytree(ROOT / 'skills/milestone-loop', package / 'skills/milestone-loop')
-                shutil.copytree(ROOT / 'skills/i-have-adhd', package / 'skills/i-have-adhd')
+                package = self.package_copy('mixed ' + updated)
                 (package / 'VERSION').write_text('999.0.0\n')
                 source = package / 'skills' / updated / 'SKILL.md'
                 current = (ROOT / 'VERSION').read_text().strip().encode()
@@ -290,12 +329,7 @@ class InstallContract(unittest.TestCase):
                     self.assertFalse(self.agents.exists())
 
     def test_package_license_must_exist_and_not_be_empty(self):
-        package = self.root / 'missing-license-package'
-        (package / 'skills').mkdir(parents=True)
-        shutil.copy2(ROOT / 'install.sh', package / 'install.sh')
-        shutil.copy2(ROOT / 'VERSION', package / 'VERSION')
-        shutil.copytree(ROOT / 'skills/milestone-loop', package / 'skills/milestone-loop')
-        shutil.copytree(ROOT / 'skills/i-have-adhd', package / 'skills/i-have-adhd')
+        package = self.package_copy('missing-license-package')
         license_source = package / 'skills/i-have-adhd/LICENSE'
         for missing in (True, False):
             with self.subTest(missing=missing):
@@ -303,6 +337,27 @@ class InstallContract(unittest.TestCase):
                     license_source.unlink()
                 else:
                     license_source.write_bytes(b'')
+                before = self.snapshot()
+                for extra in ((), ('--check',)):
+                    process = subprocess.run(
+                        ['bash', str(package / 'install.sh'), '--project', str(self.project),
+                         '--skills-dir', str(self.skills), *extra],
+                        capture_output=True, text=True,
+                    )
+                    self.assertEqual(process.returncode, 2, process.stdout + process.stderr)
+                    self.assertEqual(before, self.snapshot())
+                    self.assertFalse(self.skills.exists())
+                    self.assertFalse(self.agents.exists())
+
+    def test_package_update_source_must_exist_and_not_be_empty(self):
+        package = self.package_copy('missing-update-package')
+        update_source = package / 'skills/caldea-update/SKILL.md'
+        for missing in (True, False):
+            with self.subTest(missing=missing):
+                if missing:
+                    update_source.unlink()
+                else:
+                    update_source.write_bytes(b'')
                 before = self.snapshot()
                 for extra in ((), ('--check',)):
                     process = subprocess.run(

@@ -1,21 +1,21 @@
 # 하네스에게 내리는 설치 지침
 
-이 문서를 받은 에이전트는 아래 순서대로 대상 프로젝트를 설정하라. 기존 명령은 지정 로컬 문서·CLI help를 확인한 예시이며, **v0.2.0 설치·로드의 실행 증거는 대상 컴퓨터에서 별도로 확인**한다. 실행 전에는 설치 완료로 표시하지 않는다. 명령의 경로·scope 값은 실행 환경에서 확정한다. API 키·토큰 값은 저장소·보고서·명령 기록에 쓰지 않는다.
+이 문서를 받은 에이전트는 아래 순서대로 대상 프로젝트를 설정하라. 기존 명령은 지정 로컬 문서·CLI help를 확인한 예시이며, **v0.3.0 설치·로드의 실행 증거는 대상 컴퓨터에서 별도로 확인**한다. 실행 전에는 설치 완료로 표시하지 않는다. 명령의 경로·scope 값은 실행 환경에서 확정한다. API 키·토큰 값은 저장소·보고서·명령 기록에 쓰지 않는다.
 
 ## 0. 버전 고정 설치·갱신
 
-현재 배포 버전은 **0.2.0**, 태그는 **v0.2.0**이다. [VERSION](../VERSION)이 패키지 버전 정본이며 [변경 이력](../CHANGELOG.md)을 함께 읽는다. 저장소 루트의 AGENTS.md/CLAUDE.md는 이 문서로 라우팅하고, 설치기는 대상 AGENTS 마커에 버전과 해당 태그의 설치 지침 URL을 기록한다. 설치된 `milestone-loop`와 `i-have-adhd` 각각의 `metadata.version`으로 실제 로드한 버전을 식별한다.
+이 체크아웃의 배포 버전은 **0.3.0**, 태그는 **v0.3.0**이다. [VERSION](../VERSION)이 패키지 버전 정본이며 [변경 이력](../CHANGELOG.md)을 함께 읽는다. 저장소 루트의 AGENTS.md/CLAUDE.md는 이 문서로 라우팅하고, 설치기는 대상 AGENTS 마커에 버전과 해당 태그의 설치 지침 URL을 기록한다. 설치된 `milestone-loop`, `i-have-adhd`, `caldea-update` 각각의 `metadata.version`으로 실제 로드한 버전을 식별한다.
 
-### 새 설치 또는 기존 패키지 갱신
+### 새 설치 또는 명시적으로 요청된 기존 패키지 갱신
 
 저장소는 **비공개**이므로 읽기 권한과 승인된 GitHub 인증이 선행 조건이다. 아래는 기존 SSH 인증을 재사용하는 경로다. SSH host key 확인이 필요하면 사용자가 검증한 키만 승인하며 검사를 우회하지 않는다. 인증된 HTTPS 환경이면 clone URL만 `https://github.com/tipsy-kereru/caldea-workflow.git`으로 바꿀 수 있다. 일반 웹 reader가 태그 지침을 읽지 못하면 인증된 checkout의 `docs/install.md`를 읽는다. 인증 오류를 해결하려고 토큰·개인 키를 열람/출력하거나 저장소를 공개로 바꾸거나 전역 Git 인증 설정을 임의 변경하지 않는다. 인증 경로가 없으면 필요한 사용자 인증을 요청하고 설치 완료로 표시하지 않는다.
 
-릴리스 태그의 새 체크아웃을 사용한다. 기존 체크아웃에 미커밋 변경이 있으면 checkout/reset/pull로 덮어쓰지 않는다. 아래 clone 목적지는 아직 없는 디렉터리로 정한다.
+새 설치는 릴리스 태그의 새 체크아웃을 사용한다. 기존 체크아웃에 미커밋 변경이 있으면 checkout/reset/pull로 덮어쓰지 않는다. 아래 clone 목적지는 아직 없는 디렉터리로 정한다. **버전 조회/상태 확인은 읽기 전용**이며 패키지 소스 구현·릴리스 요청만으로 다른 프로젝트나 홈의 Caldea 설치를 갱신할 권한은 없다. 기존 설치 갱신은 사용자가 해당 대상의 갱신을 명시 요청한 경우에만 [caldea-update](../skills/caldea-update/SKILL.md)를 읽고 수행한다.
 
 ```bash
-git clone --branch v0.2.0 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git /absolute/tools/caldea-workflow-v0.2.0
+git clone --branch v0.3.0 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git /absolute/tools/caldea-workflow-v0.3.0
 # 새 체크아웃을 cwd로 사용
-cd /absolute/tools/caldea-workflow-v0.2.0
+cd /absolute/tools/caldea-workflow-v0.3.0
 git describe --tags --exact-match
 bash install.sh --version
 # 대상 프로젝트·target·기존 비표준 skills-dir을 확인한 뒤:
@@ -23,29 +23,37 @@ bash install.sh --project /absolute/project --target agents
 bash install.sh --project /absolute/project --target agents --check
 ```
 
-tag는 `v0.2.0`, installer 출력은 `Caldea Workflow 0.2.0`이어야 한다. Claude Code 전용 경로는 두 설치 명령 모두 `--target claude`로 바꾼다. 기존에 `--skills-dir`을 사용했다면 설치와 검사에 같은 절대 경로를 전달한다. VERSION과 두 스킬의 frontmatter 버전이 다르면 설치기는 쓰기 전에 exit 2로 거부한다.
+tag는 `v0.3.0`, installer 출력은 `Caldea Workflow 0.3.0`이어야 한다. Claude Code 전용 경로는 두 설치 명령 모두 `--target claude`로 바꾼다. 기존에 `--skills-dir`을 사용했다면 설치와 검사에 같은 절대 경로를 전달한다. VERSION과 세 스킬의 frontmatter 버전이 다르면 설치기는 쓰기 전에 exit 2로 거부한다.
 
-기존 Caldea도 같은 명령으로 갱신한다. 먼저 `--check`를 실행해 드리프트(exit 1)를 볼 수 있지만 검사는 갱신하지 않는다. 실제 설치는 두 Caldea 관리 스킬(`milestone-loop/SKILL.md`, `i-have-adhd/SKILL.md`와 후자의 `LICENSE`) 및 AGENTS 관리 마커만 백업 후 교체하며 **마커 밖의 기존 프로젝트 규칙·권한·DoD를 그대로 보존**한다. 기존 AGENTS 전체를 템플릿으로 교체하지 않는다. 하네스는 관리 블록의 응답 표현 규칙을 적용하거나 블록이 가리키는 설치된 `i-have-adhd` 본문을 읽는다. **사용자 홈의 스킬은 여러 프로젝트가 공유할 수 있다.** 기본 홈 경로 갱신의 영향을 확인한다. 기존 비관리 upstream `i-have-adhd`가 동명 위치에 있다면 덮어쓰지 않는다. 승인된, 해당 하네스가 실제 읽는 격리 스킬 루트를 `--skills-dir /absolute/approved/skills`로 지정해 설치·검사하고, 스킬 발견 우선순위를 확인하여 동명 upstream 스킬이 먼저 로드되거나 중복 활성화되지 않게 한다. 별도의 upstream 플러그인·훅은 자동 설치하지 않는다. 패키지 갱신만으로 기존 MCP·훅·서버·Orca를 재설치하지 않는다.
+**명시적 갱신 요청 예:** `caldea-update 스킬로 이 프로젝트의 칼데아를 최신 안정 버전으로 업데이트해줘. 기존 하네스·스킬 경로와 프로젝트 규칙을 유지하라.` 정확한 버전을 지정하려면 `caldea-update 스킬로 이 프로젝트의 칼데아를 정확히 v0.3.0으로 업데이트해줘. 기존 하네스·스킬 경로와 프로젝트 규칙을 유지하라.`라고 요청한다. 선택한 태그가 명시되면 그 태그가 우선한다. 없으면 기존 승인된 SSH remote `git@github.com:tipsy-kereru/caldea-workflow.git`(또는 기존 승인된 인증 HTTPS)에 `git ls-remote --tags --refs`로 질의하여 `vMAJOR.MINOR.PATCH` 형태의 안정 태그만 남기고 **세 정수를 숫자 순서로 비교**해 최고 버전을 선택한다. prerelease는 제외한다. 설치된 메타데이터나 GitHub Releases 부재를 “최신”의 근거로 삼지 않는다.
+
+`v0.2.0` 이하의 설치에는 `caldea-update`가 없다. 아직 없는 스킬을 로드했다고 하지 말고, 최초 갱신은 이 문서의 원격 태그 선택·고정 checkout 절차로 진행해 해당 checkout의 `skills/caldea-update/SKILL.md`를 읽는다. 같은 기존 대상·스킬 루트에 명시 승인된 갱신을 수행하면 새 스킬도 함께 설치된다. 이후 새 세션의 실제 발견을 확인한 뒤 스킬 이름으로 호출한다.
+
+대상 프로젝트 절대 경로, 실제 로드된 스킬 루트·하네스·기존 사용자 지정 `--skills-dir`, 기본 홈 스킬을 공유하는 다른 프로젝트의 영향을 실제 근거로 확인한다. 선택한 태그를 사용하지 않은 디렉터리에 clone하고 **새 체크아웃의** `docs/install.md`·`CHANGELOG.md`를 설치 전 읽어 태그·VERSION 일치도 확인한다. 같은 대상·`--target`·`--skills-dir`로 새 설치기의 `--check`를 **쓰기 전에** 실행한다. exit 0이고 내용이 같으면 강제 설치하지 않는다. exit 1은 읽기 전용 드리프트이며 명시 승인된 설치만 이어서 수행한다. exit 2(잘못된 입력·충돌)는 override하지 않고 원인을 보고한다. 설치 후 같은 인자의 `--check`를 재실행한다.
+
+설치기는 세 Caldea 관리 스킬(`milestone-loop/SKILL.md`, `i-have-adhd/SKILL.md`와 `LICENSE`, `caldea-update/SKILL.md`) 및 AGENTS 관리 마커만 백업 후 교체하며 **마커 밖의 기존 프로젝트 규칙·권한·DoD를 그대로 보존**한다. 기존 AGENTS 전체를 템플릿으로 교체하지 않는다. 하네스는 관리 블록의 응답 표현 규칙을 적용하거나 블록이 가리키는 설치된 `i-have-adhd` 본문을 읽는다. **사용자 홈의 스킬은 여러 프로젝트가 공유할 수 있다.** 기본 홈 경로 갱신의 영향을 확인한다. 기존 비관리 동명 스킬이나 symlink 충돌은 덮어쓰지 않는다. 승인된, 해당 하네스가 실제 읽는 격리 스킬 루트를 `--skills-dir /absolute/approved/skills`로 지정해 설치·검사하고, 스킬 발견 우선순위를 확인하여 동명 upstream 스킬이 먼저 로드되거나 중복 활성화되지 않게 한다. 별도의 upstream 플러그인·훅은 자동 설치하지 않는다. **설치기 자체는 remote 조회·clone을 수행하지 않으며**, 명시적으로 호출된 갱신 스킬 절차만 기존 인증을 사용한다. 패키지 갱신만으로 기존 MCP·훅·서버·Orca를 재설치하지 않는다. 자동 갱신·자동 다운그레이드·파괴적 롤백은 하지 않는다. 백업은 명시 승인된 범위의 수동 복원에만 쓴다.
 
 ### 하네스 인식과 완료 증거
 
-선택한 하네스를 재시작하거나 실제 지원하는 reload 절차를 수행한다. **설치한 같은 프로젝트 루트**의 새 세션에서 AGENTS.md의 Caldea 버전, 실제 발견된 `milestone-loop`와 `i-have-adhd`의 경로·`metadata.version`이 모두 `0.2.0`인지 확인한다. `i-have-adhd/LICENSE`의 설치 여부도 `--check`로 확인한다. 프로젝트와 스킬 루트가 달라 보이거나 동명 스킬의 우선순위가 불분명하면 설치 완료라고 하지 말고 유효 경로를 확인해 재검사한다. 기존 세션이 기억하는 구버전 설명을 새 버전 로드 증거로 쓰지 않는다.
+선택한 하네스를 재시작하거나 실제 지원하는 reload 절차를 수행한다. **설치한 같은 프로젝트 루트**의 새 세션에서 AGENTS.md의 Caldea 버전, 실제 발견된 `milestone-loop`·`i-have-adhd`·`caldea-update` 각각의 경로·`metadata.version`이 선택한 VERSION과 같은지 확인한다. `i-have-adhd/LICENSE`의 설치 여부도 `--check`로 확인한다. 프로젝트와 스킬 루트가 달라 보이거나 동명 스킬의 우선순위가 불분명하면 설치 완료라고 하지 말고 유효 경로를 확인해 재검사한다. 기존 세션이 기억하는 구버전 설명을 새 버전 로드 증거로 쓰지 않는다. 특히 교체된 `caldea-update`의 새 지침을 다시 읽고 현재 세션이 자동으로 새 스킬을 로드했다고 가정하지 않는다. 파일만 일치하면 “설치 파일 일치, native load 미확인”으로 구분한다.
 
-보고에는 `요청 tag / package --version / project(root) / harness / 두 실제 skill path / 두 loaded metadata.version / --check exit / i-have-adhd LICENSE / backup / 남은 외부 설정`을 남긴다. 예를 들어 실제 값이 확인된 **경우에만** 다음 형태로 보고한다(경로·출력은 예시이며 실행 결과가 아니다):
+보고에는 `요청 tag / 선택 근거 / package --version / project(root) / harness / skills-dir / 세 실제 skill path와 loaded metadata.version / AGENTS marker / --check exit / i-have-adhd LICENSE / backup / 남은 외부 설정`을 남긴다. 예를 들어 실제 값이 확인된 **경우에만** 다음 형태로 보고한다(경로·출력은 예시이며 실행 결과가 아니다):
 
 ```text
-project(root): /absolute/project; harness: agents; tag: v0.2.0; package --version: Caldea Workflow 0.2.0
-loaded: /absolute/approved/skills/milestone-loop/SKILL.md metadata.version=0.2.0
-loaded: /absolute/approved/skills/i-have-adhd/SKILL.md metadata.version=0.2.0; LICENSE: present
-AGENTS marker: 0.2.0; --check: exit 0; backups: <actual paths or none>; external setup: <actual status>
+project(root): /absolute/project; harness: agents; skills-dir: /absolute/approved/skills
+tag: v0.3.0 (explicit); package --version: Caldea Workflow 0.3.0
+loaded: /absolute/approved/skills/milestone-loop/SKILL.md metadata.version=0.3.0
+loaded: /absolute/approved/skills/i-have-adhd/SKILL.md metadata.version=0.3.0; LICENSE: present
+loaded: /absolute/approved/skills/caldea-update/SKILL.md metadata.version=0.3.0
+AGENTS marker: 0.3.0; --check: exit 0; backups: <actual paths or none>; external setup: <actual status>
 ```
 
 사용자에게 보이는 설명의 예시(실측 결과가 아닌 문장 형식):
 
 ```text
-설치 대상 프로젝트의 AGENTS 관리 블록은 유지하고, 두 스킬의 로드 버전을 확인하세요.
+설치 대상 프로젝트의 AGENTS 관리 블록은 유지하고, 세 스킬의 로드 버전을 확인하세요.
 1. 설치한 프로젝트 루트에서 새 하네스 세션을 엽니다.
-2. 두 스킬의 실제 로드 경로와 metadata.version을 확인합니다.
+2. 세 스킬의 실제 로드 경로와 metadata.version을 확인합니다.
 3. --check 결과와 LICENSE 존재 여부를 기록합니다.
 막힌 경우: 충돌 경로 / 비관리 동명 스킬이 먼저 발견됨(확인된 경우) / 승인된 격리 --skills-dir에서 재설치·우선순위 확인.
 ```
@@ -85,13 +93,13 @@ bash install.sh --project /absolute/project --target agents
 bash install.sh --project /absolute/project --target agents --check
 ```
 
-설치기는 Bash 3.2+, Python 3.9+를 사용한다. `--target claude`는 `~/.claude/skills/`, 기본 `agents`는 `~/.agents/skills/` 아래에 두 스킬을 복사한다. `i-have-adhd`에는 MIT `LICENSE`도 함께 복사한다. `--skills-dir /absolute/skills`로 승인된 하네스 경로를 지정할 수 있다. 명시한 skills-dir이 target보다 우선한다. AGENTS에는 Caldea 시작/종료 마커 사이만 삽입·갱신하고 기존 바이트를 보존한다. 변경되는 기존 파일은 `.bak-UTC타임스탬프-고유값`으로 백업한다. 동일 내용 재설치는 파일과 mtime을 바꾸지 않는다.
+설치기는 Bash 3.2+, Python 3.9+를 사용한다. `--target claude`는 `~/.claude/skills/`, 기본 `agents`는 `~/.agents/skills/` 아래에 세 스킬을 복사한다. `i-have-adhd`에는 MIT `LICENSE`도 함께 복사한다. `--skills-dir /absolute/skills`로 승인된 하네스 경로를 지정할 수 있다. 명시한 skills-dir이 target보다 우선한다. AGENTS에는 Caldea 시작/종료 마커 사이만 삽입·갱신하고 기존 바이트를 보존한다. 변경되는 기존 파일은 `.bak-UTC타임스탬프-고유값`으로 백업한다. 동일 내용 재설치는 파일과 mtime을 바꾸지 않는다.
 
-`--check`는 설치할 내용을 기준으로 두 스킬·`i-have-adhd/LICENSE`·AGENTS 마커의 일치를 읽기 전용으로 검사한다. 일치하면 exit 0, 누락/드리프트는 1, 잘못된 인자·중복/불완전 마커·충돌 경로는 2다. 기존 symlink 목적지나 비관리 동명 스킬을 자동 덮어쓰지 않고 오류로 보고한다. 변경 전 백업으로 수동 복원할 수 있다. 설치기는 서버·MCP·훅·Orca 등록을 수행하지 않는다.
+`--check`는 설치할 내용을 기준으로 세 스킬·`i-have-adhd/LICENSE`·AGENTS 마커의 일치를 읽기 전용으로 검사한다. 일치하면 exit 0, 누락/드리프트는 1, 잘못된 인자·중복/불완전 마커·충돌 경로는 2다. 기존 symlink 목적지나 비관리 동명 스킬을 자동 덮어쓰지 않고 오류로 보고한다. 변경 전 백업으로 명시 승인된 범위만 수동 복원할 수 있다. 설치기는 remote fetch·서버·MCP·훅·Orca 등록을 수행하지 않는다.
 
 [AGENTS 템플릿](../templates/AGENTS.md)을 보고 필수 명령·보고 경로를 기존 규칙에 채운다. Claude Code도 쓰면 CLAUDE.md 첫 줄의 `@AGENTS.md` import를 보존·추가한다. 설치기가 CLAUDE.md를 자동 변경하지 않으므로 이 확인을 생략하지 않는다.
 
-선별 품질 보강은 milestone-loop 본문에 내장되어 외부 agent-skills 설치나 공유 references가 필요 없다. 기존 설치에도 위 명령을 재실행하면 두 스킬과 Caldea 마커가 백업 후 갱신된다. 새 패키지의 `--check`만 실행하면 이전 내용은 드리프트(exit 1)로 표시하며 자동 수정하지 않는다. [선별 품질 점검 템플릿](../templates/AGENTS.md#선별-품질-점검)을 참고해 마커 밖의 기존 프로젝트 계약과 승인된 DoD를 유지한다. 보강은 checker·훅·도구를 자동 설치하지 않는다.
+선별 품질 보강은 milestone-loop 본문에 내장되어 외부 agent-skills 설치나 공유 references가 필요 없다. 기존 설치는 명시적 갱신 요청이 있을 때에만 위 갱신 절차로 세 스킬과 Caldea 마커를 백업 후 갱신한다. 새 패키지의 `--check`만 실행하면 이전 내용은 드리프트(exit 1)로 표시하며 자동 수정하지 않는다. [선별 품질 점검 템플릿](../templates/AGENTS.md#선별-품질-점검)을 참고해 마커 밖의 기존 프로젝트 계약과 승인된 DoD를 유지한다. 보강은 checker·훅·도구를 자동 설치하지 않는다.
 
 ## 2. ai-memory 서버
 
@@ -241,7 +249,7 @@ Orca가 관리하는 codex-accounts 홈은 계정 브로커의 스테일 키로 
 
 ## 6. 설치 후 합격 판정
 
-- `bash install.sh ... --check`: 스킬 bytes와 AGENTS 마커 일치.
+- `bash install.sh ... --check`: 세 스킬 bytes, `i-have-adhd/LICENSE`, AGENTS 마커 일치. 재시작/reload 후 세 스킬의 실제 로드 경로·`metadata.version`은 별도 확인.
 - `ai-memory doctor`(대상 프로젝트 루트): 최근 하네스 세션이 전부 captured인지 확인. 채택이 중반이면 backfill로 과거 이력 흡수를 선행.
 - `ai-memory status --json`: 선택한 서버·scope가 정상 응답. 재시작한 하네스에서 `memory_status` 실제 호출.
 - 비밀 없는 테스트 턴 전후 sessions/observations를 비교하고 정확한 세션 종료 및 다음 하네스에서 handoff 수신을 확인. static MCP는 workspace/project 명시.

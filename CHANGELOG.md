@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 - 2026-10-13
+
+### Features
+
+- Add `caldea-update` for explicit installation upgrades or read-only version checks. Resolve stable remote tags using numeric SemVer, pin the selected checkout, preserve the actual project/harness/skill root and follow the destination version's installation contract.
+- Bundle and verify all three managed skills through the existing installer. Require post-install checks and actual loaded-version evidence, including self-updating the update skill; preserve unmanaged collisions, project authority and external integrations.
+
+### Documentation
+
+- Route Caldea update requests through the new skill and document latest-stable and exact-tag usage. Source development/release requests do not authorize home installation updates, automatic updates or downgrades.
+
 ## 0.2.0 - 2026-10-13
 
 ### Features

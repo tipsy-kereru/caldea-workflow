@@ -1,7 +1,7 @@
 ---
 name: i-have-adhd
 description: "사용자가 이해하고 행동하기 쉬운 응답을 만든다. 답이나 행동을 먼저 제시하고, 여러 단계는 번호로 나누며, 진행 상태·검증 결과·오류·남은 다음 행동을 명확히 전달한다. Caldea에서는 사용자 대상 응답의 기본 표현 방식으로 읽고 적용하며 사용자가 normal mode를 요청하면 중단한다."
-metadata: {"version": "0.2.0"}
+metadata: {"version": "0.3.0"}
 ---
 <!-- caldea-workflow:managed-skill:v1 -->
 
@@ -9,7 +9,7 @@ metadata: {"version": "0.2.0"}
 
 [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd/tree/1ecea1993b7fce257ffbd686c070948b5e07eda6)의 응답 원칙을 한국어 Caldea 계약으로 조정한 스킬이다. upstream revision은 `1ecea1993b7fce257ffbd686c070948b5e07eda6`, 라이선스는 MIT이며 동봉한 LICENSE의 저작권·허가 문구를 보존한다. 원문과 동일한 플러그인이 아니며 upstream 훅·확장·명령은 포함하지 않는다. 사용자의 ADHD 진단이나 건강 상태를 추정하지 않는다.
 
-패키지 버전은 `metadata.version`이다. 설치·갱신은 [이 버전의 설치 지침](https://github.com/tipsy-kereru/caldea-workflow/blob/v0.2.0/docs/install.md)을 따른다. 설치된 milestone-loop와 이 스킬의 버전, AGENTS 마커, 실제 하네스 로드 경로를 각각 확인한다. 설치만으로 자연어 규칙의 강제 실행이나 이해도 개선을 입증하지 않는다.
+패키지 버전은 `metadata.version`이다. 설치·갱신은 함께 설치된 `caldea-update` 스킬과 [이 버전의 설치 지침](https://github.com/tipsy-kereru/caldea-workflow/blob/v0.3.0/docs/install.md)을 따른다. 이 고정 링크를 최신 배포 버전으로 가정하지 않는다. 업데이트 대상 checkout의 지침을 읽고 모든 패키지 스킬의 버전, AGENTS 마커, 실제 하네스 로드 경로를 각각 확인한다. 설치만으로 자연어 규칙의 강제 실행이나 이해도 개선을 입증하지 않는다.
 
 ## 적용과 우선순위
 

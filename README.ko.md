@@ -2,9 +2,9 @@
 
 사용자 지시를 마일스톤 개발, 기계 검증, 커밋, PR 리뷰, 개선과 다음 마일스톤으로 연결하는 **에이전트용 배포 패키지**다. Orca가 작업을 조율하고 OMP·Codex·Antigravity·Claude Code가 실행한다.
 
-M1은 문서, 설치 가능한 `milestone-loop` 실행 스킬과 `i-have-adhd` 응답 표현 스킬, AGENTS 템플릿, 멱등 설치기를 제공한다. 실행 데몬이나 Slack 봇을 제공하지 않는다. 아래 전체 루프는 **PROPOSAL: 설치한 하네스가 수행할 운영 계약**이다. 패키지 검사 결과와 실제 외부 서비스 실행 결과는 구분한다.
+M1은 문서, 설치 가능한 `milestone-loop` 실행 스킬·`i-have-adhd` 응답 표현 스킬·`caldea-update` 명시적 갱신 스킬, AGENTS 템플릿, 멱등 설치기를 제공한다. 실행 데몬이나 Slack 봇을 제공하지 않는다. 아래 전체 루프는 **PROPOSAL: 설치한 하네스가 수행할 운영 계약**이다. 패키지 검사 결과와 실제 외부 서비스 실행 결과는 구분한다.
 
-현재 배포는 **v0.2.0**이며 [VERSION](VERSION)과 [변경 이력](CHANGELOG.md)으로 식별한다. 설치·갱신을 맡길 하네스에는 [설치 지침](docs/install.md)의 버전 고정 절차부터 읽힌다. 비공개 저장소의 읽기 권한과 승인된 GitHub SSH 또는 HTTPS 인증이 필요하다. 루트 AGENTS/CLAUDE와 설치된 스킬·프로젝트 마커가 이 절차를 안내한다.
+현재 배포는 **v0.3.0**이며 [VERSION](VERSION)과 [변경 이력](CHANGELOG.md)으로 식별한다. 새 설치는 [설치 지침](docs/install.md), 기존 설치의 명시적 갱신은 [caldea-update](skills/caldea-update/SKILL.md)를 읽힌다. 비공개 저장소의 읽기 권한과 승인된 GitHub SSH 또는 HTTPS 인증이 필요하다. 루트 AGENTS/CLAUDE와 설치된 스킬·프로젝트 마커가 이 절차를 안내한다.
 
 ```text
 지시 → 마일스톤 선정 → 개발 → 검증게이트 → 커밋 → PR
@@ -30,9 +30,11 @@ M1은 문서, 설치 가능한 `milestone-loop` 실행 스킬과 `i-have-adhd` �
 
 ## 빠른 시작
 
-Bash 3.2 이상, Python 3.9 이상이 필요하다. `v0.2.0` 태그의 새 체크아웃에서 실행하며 기존 설치도 같은 대상·스킬 경로로 재설치한다. 기존 수정본을 덮어쓰지 않는 clone·갱신 절차는 [설치 지침](docs/install.md)을 따른다.
+Bash 3.2 이상, Python 3.9 이상이 필요하다. 새 설치는 `v0.3.0` 태그의 새 체크아웃에서 실행한다. 기존 설치 갱신은 사용자 명시 요청에만 수행하며, 사용자가 태그를 지정하면 그것을 따르고 아니면 승인된 remote의 안정 태그를 숫자 semver로 비교해 선택한다. 기존 수정본을 덮어쓰지 않는 clone·갱신 절차는 [설치 지침](docs/install.md)을 따른다.
 
 ```bash
+git clone --branch v0.3.0 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git caldea-workflow-v0.3.0
+cd caldea-workflow-v0.3.0
 bash install.sh --version
 # 대상 프로젝트가 이미 있어야 한다. 기본 스킬 위치: ~/.agents/skills/
 bash install.sh --project /absolute/path/to/project --target agents
@@ -47,7 +49,14 @@ bash install.sh --project /absolute/path/to/project --target claude
 3. 하네스에 “milestone-loop 스킬로 지정 마일스톤을 수행하라”라고 지시한다. 각 필수 명령의 종료 코드와 증거 경로를 남긴다.
 4. [운영 매뉴얼](docs/workflow.md)에 따라 PASS 후 다음 마일스톤으로 진행한다. 자동 병합은 [로드맵](docs/ROADMAP.md)의 별도 승격 조건을 따른다.
 
-한 번의 설치로 두 스킬과 `i-have-adhd/LICENSE`가 복사되며 외부 fetch·upstream 플러그인·훅은 설치하지 않는다. 기존 비관리 upstream 동명 스킬은 보존하고 승인된 격리 스킬 루트(`--skills-dir`)를 사용한다. 하네스의 스킬 발견 우선순위를 확인한 뒤 재시작/reload하여 실제 로드한 **두 스킬의** 경로·`metadata.version` (`0.2.0`)과 대상 AGENTS 버전을 확인한다. `--check`는 드리프트를 읽기 전용으로 표시할 뿐 갱신하지 않으며, 기본 홈 스킬 갱신은 다른 프로젝트에도 영향을 줄 수 있다. “일반 모드로 답해줘” 또는 “ADHD 모드 중지” 요청에는 표현 방식을 끄고 명시적 재요청에만 다시 적용한다.
+한 번의 설치로 세 스킬(`milestone-loop`, `i-have-adhd`, `caldea-update`)과 `i-have-adhd/LICENSE`가 복사되며 설치기 자체는 외부 fetch·upstream 플러그인·훅을 실행하지 않는다. **명시적으로 호출된** `caldea-update`만 승인된 Git remote를 조회하고 선택한 태그를 사용하지 않은 경로에 clone한다. 새 체크아웃의 설치 지침·변경 이력·VERSION을 읽고 동일한 대상·하네스·기존 사용자 지정 `--skills-dir`로 읽기 전용 `--check`(드리프트 exit 1은 수리 아님, 충돌/입력 오류 exit 2는 덮어쓰기 금지)를 먼저 수행한다. 같으면 강제 재설치하지 않는다. 기존 비관리 upstream 동명 스킬은 보존하고 승인된 격리 스킬 루트를 사용한다. 하네스 재시작/reload 뒤 실제 로드한 **모든 패키지 스킬의** 경로·`metadata.version`과 대상 AGENTS 버전이 선택한 checkout의 VERSION과 같은지 확인한다(현재 패키지: 세 스킬, `0.3.0`). 파일 일치만으로 실제 로드를 주장하지 않는다. 기본 홈 스킬은 여러 프로젝트가 공유하며 자동 갱신·다운그레이드는 없다. 버전 확인 요청이나 소스 패키지 개발·배포 요청은 대상 설치 갱신 권한이 아니다. “일반 모드로 답해줘” 또는 “ADHD 모드 중지” 요청에는 표현 방식만 끄고 명시적 재요청에만 다시 적용한다.
+
+설치 갱신을 명시적으로 요청하는 예:
+
+```text
+caldea-update 스킬로 이 프로젝트의 칼데아를 최신 안정 버전으로 업데이트해줘. 기존 하네스·스킬 경로와 프로젝트 규칙을 유지하라.
+caldea-update 스킬로 이 프로젝트의 칼데아를 정확히 v0.3.0으로 업데이트해줘. 기존 하네스·스킬 경로와 프로젝트 규칙을 유지하라.
+```
 
 ## 구성과 검증
 
@@ -58,7 +67,7 @@ bash install.sh --project /absolute/path/to/project --target claude
 | [설치 지침](docs/install.md) | 하네스별 서버·MCP·훅 연결 |
 | [운영 매뉴얼](docs/workflow.md) | 상태 전이·실패 복구·보고 계약 |
 | [AGENTS 템플릿](templates/AGENTS.md) | 프로젝트별 강제 게이트 정의 |
-| [두 스킬](skills/milestone-loop/SKILL.md), [응답 스킬](skills/i-have-adhd/SKILL.md) | 실행 절차와 대화 표현; 후자에 MIT LICENSE 동봉 |
+| [실행 스킬](skills/milestone-loop/SKILL.md), [응답 스킬](skills/i-have-adhd/SKILL.md), [갱신 스킬](skills/caldea-update/SKILL.md) | 세 스킬: 실행 절차·대화 표현·명시적 설치 갱신; 응답 스킬에 MIT LICENSE 동봉 |
 | [설치기](install.sh) | 스킬 복사·마커 병합·백업·검사 |
 | [결정 기록](docs/DECISIONS.md) | 승인된 링크 검사 경계 |
 

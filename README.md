@@ -2,9 +2,9 @@
 
 사용자 지시를 **마일스톤 개발 → 검증 → PR 리뷰 → 개선 → 다음 마일스톤**으로 연결하는 에이전트용 워크플로우 패키지입니다. Orca가 작업을 조율하고 OMP·Codex·Antigravity·Claude Code 같은 하네스가 실행하는 운영 절차를 제공합니다.
 
-현재 M1 패키지에는 설치 가능한 `milestone-loop`(실행 절차)와 `i-have-adhd`(응답 표현) 스킬, 프로젝트 지침 템플릿, 설치기와 운영 문서가 포함됩니다. **독립 실행 애플리케이션, 실행 데몬, Slack 봇은 아닙니다.** 아래 루프는 설치한 하네스가 수행할 운영 계약이며, 패키지 설치만으로 CI·외부 서비스·자동 병합이 활성화되지는 않습니다.
+현재 M1 패키지에는 설치 가능한 `milestone-loop`(실행 절차), `i-have-adhd`(응답 표현), `caldea-update`(명시적 갱신 절차) 세 스킬과 프로젝트 지침 템플릿, 설치기·운영 문서가 포함됩니다. **독립 실행 애플리케이션, 실행 데몬, Slack 봇은 아닙니다.** 아래 루프는 설치한 하네스가 수행할 운영 계약이며, 패키지 설치만으로 CI·외부 서비스·자동 병합이 활성화되지는 않습니다.
 
-현재 릴리스: **v0.2.0** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치·갱신을 맡기려면 [설치 지침](docs/install.md)을 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
+현재 릴리스: **v0.3.0** ([VERSION](VERSION), [변경 이력](CHANGELOG.md)). 하네스에게 설치를 맡기려면 [설치 지침](docs/install.md)을, 기존 설치의 명시적 갱신을 맡기려면 [caldea-update](skills/caldea-update/SKILL.md)를 읽히세요. 루트 `AGENTS.md`와 `CLAUDE.md`, 설치된 스킬과 프로젝트 관리 마커에도 버전·설치 경로가 안내됩니다.
 
 저장소는 비공개입니다. 읽기 권한과 기존 GitHub SSH 인증이 필요합니다. 인증된 HTTPS를 사용하는 환경의 대체 절차도 설치 지침에 있습니다.
 
@@ -20,6 +20,7 @@
 
 - **마일스톤 실행 절차:** 범위·완료 조건(DoD)·권한을 확인하고, 검증과 리뷰 증거를 남기는 `milestone-loop` 스킬.
 - **읽기 쉬운 응답:** [i-have-adhd](skills/i-have-adhd/SKILL.md)를 읽고 마일스톤 밖의 대화에도 결과·행동 우선, 짧은 단계, 분명한 오류 설명을 적용합니다. ADHD 진단을 전제하지 않으며 사용자 언어·형식 요청과 필수 증거가 우선합니다. [원 저작자 MIT 라이선스](skills/i-have-adhd/LICENSE)를 동봉합니다.
+- **승인된 패키지 갱신:** 명시적으로 설치 갱신을 요청받은 경우에만 `caldea-update`가 안정 태그를 확인하고 고정 체크아웃의 지침·설치기로 같은 대상·스킬 루트를 갱신합니다. 버전 조회나 패키지 소스 개발·배포만으로 대상 설치를 바꾸지 않습니다.
 - **작업 맥락 체크포인트:** 새 작업·인계·재개 때 최신 근거를 확인하고 종료 보고를 남깁니다. 같은 작업의 유효한 맥락은 재사용하며, 코디네이터가 증거를 대조한 뒤 후속 의존 작업을 허용합니다.
 - **프로젝트 지침:** 기존 `AGENTS.md`에 병합할 게이트·보고·실패 복구 규칙.
 - **멱등 설치기:** 스킬 복사, AGENTS 관리 블록 갱신, 변경 전 백업, 읽기 전용 설치 상태 검사.
@@ -30,8 +31,8 @@
 **필수 환경:** Git(저장소 복제 및 커밋·PR 루프), Bash 3.2 이상, Python 3.9 이상. 설치 대상 프로젝트 디렉터리는 미리 존재해야 합니다.
 
 ```bash
-git clone --branch v0.2.0 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git caldea-workflow-v0.2.0
-cd caldea-workflow-v0.2.0
+git clone --branch v0.3.0 --single-branch git@github.com:tipsy-kereru/caldea-workflow.git caldea-workflow-v0.3.0
+cd caldea-workflow-v0.3.0
 bash install.sh --version
 
 # /absolute/path/to/project를 실제 대상 프로젝트 경로로 바꾸세요.
@@ -41,7 +42,7 @@ bash install.sh --project /absolute/path/to/project --target agents --check
 
 기본 설치 결과:
 
-- 한 번의 설치로 `~/.agents/skills/milestone-loop/SKILL.md`와 `~/.agents/skills/i-have-adhd/SKILL.md` 및 후자의 `LICENSE`를 복사합니다. 외부 fetch·플러그인·훅은 이 패키지 설치에 필요하지 않습니다.
+- 한 번의 설치로 `~/.agents/skills/` 아래 `milestone-loop`, `i-have-adhd`, `caldea-update`의 `SKILL.md`와 `i-have-adhd/LICENSE`를 복사합니다. 설치기는 외부 fetch·플러그인·훅을 수행하지 않습니다.
 - 대상 프로젝트의 `AGENTS.md`에 `caldea-workflow:start` / `caldea-workflow:end` 마커 블록을 삽입하거나 갱신합니다. 블록 밖의 기존 내용은 보존합니다.
 - 변경하는 기존 파일은 `.bak-<타임스탬프>-<고유값>`으로 백업합니다. 같은 내용으로 재설치하면 파일과 수정 시각을 바꾸지 않습니다.
 
@@ -66,7 +67,7 @@ bash install.sh --project /absolute/path/to/project --target claude --check
 
 `--check`의 종료 코드는 일치 `0`, 누락·드리프트 `1`, 잘못된 인자·마커·경로 충돌 등 오류 `2`입니다. 설치기는 symlink 대상이나 Caldea 소유가 아닌 동명 스킬을 자동 덮어쓰지 않습니다. 기존 upstream `i-have-adhd`와 충돌하면 보존하고 해당 하네스가 읽는 승인된 격리 스킬 루트를 `--skills-dir`로 지정하세요. 실제 스킬 발견 우선순위를 확인해 동명 스킬이 중복 로드되지 않게 하며 upstream 플러그인을 자동 설치하지 않습니다.
 
-기존 설치는 새 태그 체크아웃에서 동일 대상·스킬 경로로 설치와 `--check`를 실행해 갱신합니다. 하네스를 재시작/reload한 뒤 대상 프로젝트의 AGENTS 버전과 실제 로드된 **두 스킬 각각**의 경로·`metadata.version` (`0.2.0`)을 확인하세요. 기본 홈 스킬은 여러 프로젝트가 공유할 수 있습니다. 상세 절차와 응답 예시·일반 모드 전환은 [설치 지침](docs/install.md)을 따릅니다.
+기존 설치의 **명시적 갱신 요청**에는 `caldea-update`를 사용합니다. 태그를 지정하면 해당 태그를 따르고, 미지정이면 승인된 Git remote의 안정 태그를 숫자 semver 순서로 비교합니다(사전순·날짜·설치 메타데이터에 의존하지 않음). 선택 태그를 사용하지 않은 새 경로에 clone하고 새 체크아웃의 지침과 변경 이력을 읽은 뒤 기존 대상·`--target`·사용자 지정 `--skills-dir`로 읽기 전용 `--check` → 승인된 설치 → `--check`를 수행합니다. 같으면 강제 쓰기를 하지 않습니다. 하네스를 재시작/reload한 뒤 대상 프로젝트 마커와 실제 로드된 **모든 패키지 스킬 각각**의 경로·`metadata.version`이 선택한 checkout의 VERSION과 일치하는지 확인하세요(현재 패키지: 세 스킬, `0.3.0`). 기본 홈 스킬은 여러 프로젝트가 공유할 수 있습니다. 버전 조회만으로 설치를 바꾸지 않으며 자동 갱신·다운그레이드는 없습니다. 상세 절차와 응답 예시·일반 모드 전환은 [설치 지침](docs/install.md)을 따릅니다.
 
 ## 설치 후 사용
 
@@ -78,6 +79,13 @@ bash install.sh --project /absolute/path/to/project --target claude --check
    milestone-loop 스킬로 승인된 마일스톤을 수행하라.
    프로젝트 AGENTS.md의 범위·DoD·권한을 따르고,
    필수 검증 명령의 종료 코드와 증거 경로를 보고하라.
+   ```
+
+   설치된 Caldea를 갱신하려는 별도 요청의 예(소스 패키지 개발·배포 요청과 구분):
+
+   ```text
+   caldea-update 스킬로 이 프로젝트의 칼데아를 최신 안정 버전으로 업데이트해줘. 기존 하네스·스킬 경로와 프로젝트 규칙을 유지하라.
+   caldea-update 스킬로 이 프로젝트의 칼데아를 정확히 v0.3.0으로 업데이트해줘. 기존 하네스·스킬 경로와 프로젝트 규칙을 유지하라.
    ```
 
 4. [운영 매뉴얼](docs/workflow.md)에 따라 리뷰·개선·재검증을 수행합니다. 최종 PASS와 같은 revision의 필수 검증 증거를 확보한 뒤 다음 마일스톤으로 진행합니다.
@@ -101,6 +109,7 @@ bash install.sh --project /absolute/path/to/project --target claude --check
 | [운영 매뉴얼](docs/workflow.md) | 상태 전이, 리뷰, 실패 복구, 보고 계약 |
 | [AGENTS 템플릿](templates/AGENTS.md) | 프로젝트별 범위·DoD·검증 게이트 작성 |
 | [milestone-loop 스킬](skills/milestone-loop/SKILL.md) | 설치해서 사용하는 실행 절차 |
+| [caldea-update 스킬](skills/caldea-update/SKILL.md) | 명시적으로 요청된 기존 설치의 안전한 갱신 절차 |
 | [로드맵](docs/ROADMAP.md) | 단계별 진입·종료 조건과 자동화 승격 |
 | [연구 종합](docs/00-research.md) | 설계 근거와 VERIFIED/PROPOSAL 구분 |
 | [결정 기록](docs/DECISIONS.md) | 승인된 설계·검증 경계 |

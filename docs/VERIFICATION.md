@@ -147,3 +147,23 @@ $ git diff --stat
 - `context_end`: 결과 VERSION `0.2.0`에서 두 스킬과 LICENSE·관리 AGENTS·템플릿·설치/운영 안내를 통합했고 [D006](DECISIONS.md#d006--이해하기-쉬운-응답-표현-스킬-배포)에 출처·권한 경계를 기록했다. 다음 행동은 같은 revision의 커밋·annotated tag·원격 push, 게시된 태그의 실제 checkout/설치/검사 및 요청한 현재 하네스 스킬 갱신이다. 배포와 실제 설치 결과는 최종 응답에 별도로 기록한다.
 
 한계: 모델 smoke는 가상 입력에 대한 지침 적용 관찰이지 native 스킬 자동 발견/reload·세션 간 지속성·실제 이해도 개선의 증거가 아니다. 실제 하네스 재시작 및 두 스킬의 새 세션 로드는 파일 검사와 분리해 판정한다. upstream 플러그인·훅·npm 패키지·MCP·외부 서비스는 설치하지 않았고 민감 데이터 전송이나 운영 신뢰 단계 승격도 추가하지 않았다.
+
+## 2026-10-13 — v0.3.0 명시적 업데이트 스킬
+
+- `context_start`: clean `main` 기준 `76d606e`에서 새 사용자 요청과 README·D004–D006·설치 지침·세션의 이전 배포 결과·현재 설치기/검사/스킬/AGENTS를 확인했다. 범위는 `caldea-update` 패키징·설치/라우팅·사용 안내와 `0.3.0` 소스 배포다. 사용자 홈이나 다른 프로젝트의 실제 설치 갱신, 전역 설정·MCP·훅 변경은 승인 범위에 포함하지 않았다.
+- `python3 scripts/verify.py`: exit 0, 필수 산출물 11개·문서 상대 링크 92개·세 스킬 frontmatter/version·Bash 구문·diff 공백·시딩 4개 SHA-256 통과. `--source-links`는 미실행이다.
+- `python3 scripts/test_install.py`: exit 0, 26 tests OK. 세 번째 스킬의 드리프트/백업·비관리 충돌 시 앞선 파일 변경 방지·symlink 거부·누락/빈 source 검사와 세 스킬 혼합 버전 검사를 포함한다. `bash install.sh --version`: `Caldea Workflow 0.3.0`, exit 0.
+- 실제 `v0.2.0` 태그를 git archive로 격리 경로에 추출해 설치한 후 개발 소스의 `0.3.0` 설치기로 갱신했다. 같은 프로젝트·사용자 지정 `.agents/skills` 경로에서 갱신 전 `--check` exit 1과 bytes/mtime 불변, 갱신 후 exit 0, 세 스킬 metadata 0.3.0·이전 스킬 백업·기존 권한 문구 보존·재설치 UNCHANGED와 bytes/mtime 불변을 확인했다. 리포 AGENTS 관리 블록도 같은 격리 루트로 준비하고 검사했으며 사용자 홈은 변경하지 않았다.
+- 공식 원격에 실제 `git ls-remote --tags --refs`를 실행해 이 릴리스 push 전 안정 태그 `v0.1.0`, `v0.1.1`, `v0.1.2`, `v0.2.0`을 확인했다. 최초 bash-enabled native 조회 smoke는 subprocess 180초 timeout으로 종료했고 프로젝트 파일 bytes/mtime은 불변이었다. 원인은 확인되지 않았으므로 전체 native 업데이트 루프의 성공으로 기록하지 않는다.
+- 별도의 read-only 새 OMP 세션(`--no-session --no-extensions --no-pty --tools read`)에서 `caldea-update`가 프로젝트 스킬 목록에 실제 발견되어 `skill://caldea-update`로 읽혔다. 실제 선택 경로는 임시 프로젝트의 `.agents/skills/caldea-update/SKILL.md`, metadata는 0.3.0이었다. 같은 세션이 프로젝트의 `i-have-adhd`도 스킬 URI로 읽고 “버전 확인만 요청하면 설치하지 않는다”를 응답했다. 모델은 `openai-codex/gpt-6.1-sol`, thinking minimal이다.
+- 설치된 업데이트 스킬을 system으로 읽힌 도구 없는 `completion` smoke(`default` 모델 선택; 구체 ID 미기록)에서 아래 가상 증거에 대한 응답을 관측했다.
+
+| 가상 입력 | 관측 결과 |
+|---|---|
+| v0.9.9 / v0.10.0 / v0.11.0-rc.1 / v0.10.0+build.2 / v0.09.8, 조회만 요청 | 숫자 비교로 v0.10.0 선택, prerelease/build/선행 0 후보 제외, clone·설치·재시작 없음 |
+| 승인된 v0.4.0 갱신, custom skills-root, 새 지침 읽음, --check exit 1 | 지정한 project/target/custom root를 유지한 설치·재검사 명령, revision/버전 확인과 새 세션 실제 로드를 별도 요구 |
+| 소스 스킬 추가·버전업·push만 요청, 홈 설치 승인 없음 | 홈 자동 갱신 거부, 단순 파일 읽기를 새 세션 로드 성공으로 과장하지 않음 |
+
+- `context_end`: VERSION `0.3.0`의 세 스킬·관리 라우팅·설치/운영 문서를 통합하고 [D007](DECISIONS.md#d007--명시적-caldea-설치-갱신-스킬)에 승인 범위와 기존 경로·권한 보존을 기록했다. 다음 행동은 같은 revision의 커밋·annotated tag·원격 push와 게시 태그의 격리 설치 확인이며 결과는 최종 배포 응답으로 보고한다.
+
+한계: 실제 설치·갱신과 native 스킬 발견, 도구 없는 판단 smoke를 각각 검증했다. native 에이전트가 전체 remote 조회→clone→설치→restart를 자동 수행했다는 증거는 없으며, 가상 태그와 v0.4.0 입력은 실제 배포가 아니다. 실제 홈 설치나 다른 하네스 설정은 이 요청에서 갱신하지 않는다.

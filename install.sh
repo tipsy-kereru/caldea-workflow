@@ -37,9 +37,10 @@ end = b'<!-- caldea-workflow:end -->'
 owner = b'<!-- caldea-workflow:managed-skill:v1 -->'
 snippet = '''<!-- caldea-workflow:start -->
 ## 칼데아 워크플로우 라우팅
-패키지 버전: {version}. 설치·갱신은 https://github.com/tipsy-kereru/caldea-workflow/blob/v{version}/docs/install.md 를 먼저 읽고 대상 프로젝트·하네스·스킬 경로를 확인한다.
+패키지 버전: {version}. Caldea 설치 갱신·버전 확인 요청이면 설치된 caldea-update 스킬을 읽고 대상 프로젝트·실제 하네스·스킬 경로를 확인한다. 버전·상태 조회는 읽기 전용이며, 소스 구현·릴리스 요청은 대상 설치 갱신 권한이 아니다.
 마일스톤 구현 요청에는 설치된 milestone-loop 스킬을 읽고 프로젝트의 범위·DoD·권한을 따른다.
 응답 형식에는 설치된 i-have-adhd 스킬을 먼저 읽고 적용한다. 사용자가 일반 모드 또는 ADHD 모드 중지를 요청하면 중단하고, 명시적으로 다시 요청하면 재개한다. 사용자 언어·지정 형식·설명 길이와 시스템·하네스 요구가 우선한다.
+기준 설치 지침은 https://github.com/tipsy-kereru/caldea-workflow/blob/v{version}/docs/install.md 이다. 이 링크를 최신 버전으로 가정하지 말고, 업데이트에는 선택한 원격 안정 태그 또는 사용자 지정 태그 checkout의 설치 지침을 읽고 적용한다.
 ### 이해하기 쉬운 응답
 답·결과·행동을 먼저 말한다. 여러 단계는 번호를 매겨 짧고 끝이 보이게 쓰고, 긴 목록은 약 5개씩 묶되 필수 증거·오류·위험은 생략하지 않는다.
 진행 상황은 기존 작업 체크리스트로 보여 주며 중복 설명하지 않는다. 오류는 위치·원인·해결 방법을 밝히고 불확실한 원인은 추정이라고 표시한다.
@@ -119,6 +120,7 @@ def main():
     skill_specs = (
         ('milestone-loop', ('SKILL.md',)),
         ('i-have-adhd', ('SKILL.md', 'LICENSE')),
+        ('caldea-update', ('SKILL.md',)),
     )
     sources = {}
     for name, files in skill_specs:
@@ -159,7 +161,7 @@ def main():
         for path, _, _ in drift:
             print(f'MISSING_OR_DRIFT: {path}')
         if not drift:
-            print('PASS: 두 스킬, LICENSE와 AGENTS 마커 일치 (읽기 전용 검사)')
+            print('PASS: 세 스킬, LICENSE와 AGENTS 마커 일치 (읽기 전용 검사)')
         return 1 if drift else 0
     if not drift:
         print('UNCHANGED: 이미 같은 내용으로 설치되어 있습니다.')

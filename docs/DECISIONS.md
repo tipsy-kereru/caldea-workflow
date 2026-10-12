@@ -49,3 +49,12 @@
 - 통합: `0.2.0`에서 기존 `milestone-loop`와 별도 `i-have-adhd` 스킬 및 MIT LICENSE를 한 설치기로 복사·검사한다. 기존 AGENTS의 관리 마커 밖 내용은 보존한다. 마일스톤 밖에도 읽기 쉬운 표현을 사용하지만 명시적인 사용자 언어·형식·길이 요청과 일반 모드 opt-out이 우선한다.
 - 안전 경계: 기존 비관리 동명 upstream 스킬을 덮어쓰지 않고 승인된 격리 `--skills-dir`과 실제 하네스의 발견 우선순위를 확인한다. upstream 플러그인·훅·npm 패키지·네트워크 fetch·전역 설정은 자동 설치하지 않는다. DoD·권한·동일 head PASS·리뷰 라운드·필수 보고 스키마와 증거에는 변경이 없다.
 - 배포 범위: 요청한 `0.2.0` main 커밋·push와 같은 revision의 annotated tag·push. GitHub Release 게시는 포함하지 않으며 다른 프로젝트 설치나 외부 연동 변경도 포함하지 않는다. 설치 복사·`--check`와 실제 하네스 reload·두 스킬의 로드 확인은 별도 증거로 판단한다.
+
+## D007 — 명시적 Caldea 설치 갱신 스킬
+
+- 상태: **승인**, 2026-10-13, 사용자 요청으로 Caldea Workflow 갱신 절차를 새 스킬로 배포하고 `0.3.0` 버전·remote push.
+- 결정: `caldea-update`는 새 updater CLI/daemon이 아닌 에이전트 절차다. 설치기는 `milestone-loop`, `i-have-adhd`, `caldea-update` 세 스킬과 `i-have-adhd/LICENSE` 및 AGENTS 관리 마커만 복사·검사한다. remote fetch는 설치기에 넣지 않는다.
+- 권한 경계: 대상 설치의 명시적 갱신 요청만 쓰기 권한이다. 버전·상태 조회는 읽기 전용이며 이 소스 패키지의 구현·릴리스 요청은 다른 프로젝트/홈 설치 갱신을 승인하지 않는다. 자동 갱신·자동 다운그레이드·파괴적 롤백은 하지 않는다. 기본 홈 스킬의 공유 영향과 기존 비표준 `--skills-dir`을 확인한다.
+- 버전 선택: 지정 태그가 우선한다. 없으면 승인된 remote의 `git ls-remote --tags --refs` 결과 중 `vMAJOR.MINOR.PATCH` 안정 태그만 세 숫자 semver 비교로 최고 버전을 고른다. 설치된 메타데이터·GitHub Releases 부재·사전순·날짜로 최신을 추측하지 않는다. 선택 태그를 새 경로에 clone하고 새 checkout의 `docs/install.md`·`CHANGELOG.md`를 읽으며 태그/VERSION 일치를 확인한다. 기존 SSH 또는 승인된 HTTPS 인증을 재사용하고 토큰·키 열람, 공개 전환, 보안 설정 변경은 금지한다.
+- 안전·완료: 실제 대상·하네스·로드된 스킬 루트를 확인하고 동일 인자의 설치기 `--check`를 쓰기 전후 수행한다. exit 1은 드리프트 확인일 뿐 수리가 아니며 exit 2 충돌/입력 오류는 override하지 않는다. 동일 상태는 강제 쓰지 않는다. 프로젝트 AGENTS 마커 밖 규칙·DoD와 외부 설정을 보존하고 symlink/비관리 동명 스킬을 덮어쓰지 않는다. 새 세션의 하네스 restart/reload 후 세 스킬의 실제 로드 경로·metadata와 프로젝트 마커를 확인한다. 파일 일치는 native load 증거가 아니며 교체된 갱신 스킬 지침을 다시 읽는다.
+- 배포 범위: 요청한 `0.3.0` 소스 릴리스만 main 커밋·push 및 같은 revision의 annotated `v0.3.0` 태그·push로 배포한다. 다른 프로젝트나 홈의 설치, 새 플러그인·MCP·전역 훅 설정은 포함하지 않는다.

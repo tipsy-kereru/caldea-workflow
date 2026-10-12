@@ -2,10 +2,10 @@
 
 ## Install or upgrade Caldea
 
-- Read [docs/install.md](docs/install.md), starting with **0. 버전 고정 설치·갱신**, before installing or upgrading. Do not treat an implementation request as installation approval.
+- For explicit installation updates or version checks, read [skills/caldea-update/SKILL.md](skills/caldea-update/SKILL.md), then [docs/install.md](docs/install.md), starting with **0. 버전 고정 설치·갱신**. Resolve the requested or newest stable remote tag and read that checkout's instructions before writes. Version checks are read-only; an implementation/release request is not installation approval.
 - [VERSION](VERSION) is the package version source. The release tag is `v<VERSION>`; use a pinned tag checkout rather than an unreviewed `main` update.
 - Inspect the target project's existing rules, selected harness and actual skill directory. Preserve project authority and DoD; update only the installer-managed skills, bundled license and Caldea marker.
-- Run the installer and its read-only `--check` against the same target and skill directory. Restart/reload the selected harness and verify both loaded skills' `metadata.version` and the target AGENTS marker version. File presence alone is not installation completion.
+- Run the installer and its read-only `--check` against the same target and skill directory. Restart/reload the selected harness and verify all packaged skills' loaded `metadata.version` and the target AGENTS marker version. File presence alone is not installation completion.
 - Updating the package does not authorize new MCP servers, hooks, global plugin installation, external data transfer or automatic merge. Keep working integrations unless separately requested.
 
 ## Work on this repository
@@ -13,14 +13,15 @@
 - Read [README.md](README.md), [docs/DECISIONS.md](docs/DECISIONS.md) and the relevant implementation contract. The executable workflow lives in [skills/milestone-loop/SKILL.md](skills/milestone-loop/SKILL.md); read [skills/i-have-adhd/SKILL.md](skills/i-have-adhd/SKILL.md) for user-facing responses, including non-milestone questions. User language, explicit format, full explanations and normal-mode opt-out override the presentation defaults, not authority or DoD.
 - Use the workflow's task-level `context_start` and `context_end` in the existing brief/report: verify current relevant context before a new task or resume, record the result and next action at completion, and reconcile evidence before dependent work. Reuse valid context within the task; refresh only affected inputs after external changes. Do not create per-tool memory reads or per-task session finalization.
 - Before releasing, run `python3 scripts/verify.py` and `python3 scripts/test_install.py`, and exercise an isolated install/upgrade with `--skills-dir`. Preserve seeded reference documents.
-- Keep VERSION, both skills' metadata, their version-pinned install links and release documentation consistent. Record changes in [CHANGELOG.md](CHANGELOG.md). Commit/push/tag only when requested.
+- Keep VERSION, all skills' metadata, their version-pinned install links and release documentation consistent. Record changes in [CHANGELOG.md](CHANGELOG.md). Commit/push/tag only when requested.
 - This root file guides agents working on the Caldea package. Do not copy it over another project's AGENTS.md; use `install.sh` and [templates/AGENTS.md](templates/AGENTS.md).
 
 <!-- caldea-workflow:start -->
 ## 칼데아 워크플로우 라우팅
-패키지 버전: 0.2.0. 설치·갱신은 https://github.com/tipsy-kereru/caldea-workflow/blob/v0.2.0/docs/install.md 를 먼저 읽고 대상 프로젝트·하네스·스킬 경로를 확인한다.
+패키지 버전: 0.3.0. Caldea 설치 갱신·버전 확인 요청이면 설치된 caldea-update 스킬을 읽고 대상 프로젝트·실제 하네스·스킬 경로를 확인한다. 버전·상태 조회는 읽기 전용이며, 소스 구현·릴리스 요청은 대상 설치 갱신 권한이 아니다.
 마일스톤 구현 요청에는 설치된 milestone-loop 스킬을 읽고 프로젝트의 범위·DoD·권한을 따른다.
 응답 형식에는 설치된 i-have-adhd 스킬을 먼저 읽고 적용한다. 사용자가 일반 모드 또는 ADHD 모드 중지를 요청하면 중단하고, 명시적으로 다시 요청하면 재개한다. 사용자 언어·지정 형식·설명 길이와 시스템·하네스 요구가 우선한다.
+기준 설치 지침은 https://github.com/tipsy-kereru/caldea-workflow/blob/v0.3.0/docs/install.md 이다. 이 링크를 최신 버전으로 가정하지 말고, 업데이트에는 선택한 원격 안정 태그 또는 사용자 지정 태그 checkout의 설치 지침을 읽고 적용한다.
 ### 이해하기 쉬운 응답
 답·결과·행동을 먼저 말한다. 여러 단계는 번호를 매겨 짧고 끝이 보이게 쓰고, 긴 목록은 약 5개씩 묶되 필수 증거·오류·위험은 생략하지 않는다.
 진행 상황은 기존 작업 체크리스트로 보여 주며 중복 설명하지 않는다. 오류는 위치·원인·해결 방법을 밝히고 불확실한 원인은 추정이라고 표시한다.
